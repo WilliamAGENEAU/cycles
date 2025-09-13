@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 Widget saignementCard({
   required int bleeding,
@@ -6,12 +7,12 @@ Widget saignementCard({
   required BuildContext context,
 }) {
   final colorScheme = Theme.of(context).colorScheme;
-  final labels = ['Aucun', 'Léger', 'Modéré', 'Abondant'];
-  final colors = [
-    colorScheme.surfaceVariant,
-    colorScheme.tertiaryContainer,
-    colorScheme.errorContainer,
-    colorScheme.error,
+  final labels = ['Spotting', 'Faibles', 'Moyens', 'Intenses'];
+  final icons = [
+    'assets/icons/spotting.svg',
+    'assets/icons/light.svg',
+    'assets/icons/medium.svg',
+    'assets/icons/heavy.svg',
   ];
 
   return Card(
@@ -30,41 +31,58 @@ Widget saignementCard({
               color: colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(4, (i) {
               final selected = bleeding == i;
               return GestureDetector(
                 onTap: () => onChanged(i),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: selected ? colors[i] : colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: selected
-                        ? [
-                            BoxShadow(
-                              color: colorScheme.shadow.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Text(
-                    labels[i],
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: selected
-                          ? colorScheme.onPrimary
-                          : colorScheme.onSurface,
+                child: Column(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      height: 60,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: selected
+                            ? colorScheme.errorContainer
+                            : colorScheme.error,
+                        boxShadow: selected
+                            ? [
+                                BoxShadow(
+                                  color: colorScheme.shadow.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          icons[i],
+                          width: 28,
+                          height: 28,
+                          colorFilter: ColorFilter.mode(
+                            selected ? colorScheme.error : colorScheme.onError,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Text(
+                      labels[i],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: selected
+                            ? colorScheme.error
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }),

@@ -15,7 +15,7 @@ Widget temperatureCard({
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Température basale au réveil',
+            'Température',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: colorScheme.onSurface,
@@ -23,9 +23,12 @@ Widget temperatureCard({
           ),
           const SizedBox(height: 12),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: TextField(
+                  textAlign: TextAlign.center,
                   controller: controller,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -36,7 +39,7 @@ Widget temperatureCard({
                     color: colorScheme.onSurface,
                   ),
                   decoration: InputDecoration(
-                    hintText: '36.65',
+                    hintText: '36.6',
                     hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     border: InputBorder.none,
                   ),
