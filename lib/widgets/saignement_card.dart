@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -7,10 +9,10 @@ Widget saignementCard({
   required BuildContext context,
 }) {
   final colorScheme = Theme.of(context).colorScheme;
-  final labels = ['Spotting', 'Faibles', 'Moyens', 'Intenses'];
+  final labels = ['Légers', 'Modérés', 'Abondants', 'Très abondants'];
   final icons = [
-    'assets/icons/spotting.svg',
     'assets/icons/light.svg',
+    'assets/icons/light2.svg',
     'assets/icons/medium.svg',
     'assets/icons/heavy.svg',
   ];

@@ -164,82 +164,65 @@ class _SaisiePageState extends State<SaisiePage> {
                   ),
                   SizedBox(height: 12),
                   iconOptionsCard(
-                    'Glaires',
-                    mucusOptions,
-                    _mucus,
-                    (v) => setState(() => _mucus = v),
+                    title: "Glaires",
+                    labels: ["Sèches", "Visqueuses", "Crémeuses", "Élastiques"],
+                    icons: [
+                      "assets/images/dry.png",
+                      "assets/images/creamy.png",
+                      "assets/images/clear.png",
+                      "assets/images/stretchy.png",
+                    ],
+                    context: context,
+                    selected: [], // une seule valeur
+                    onChanged: (val) => print("Glaire sélectionnée: $val"),
+                    singleSelection: true,
+                    activeColor: Theme.of(context).colorScheme.tertiary,
+                    inactiveColor: Theme.of(
+                      context,
+                    ).colorScheme.tertiaryContainer,
+                    onColor: Theme.of(context).colorScheme.onTertiary,
                   ),
                   SizedBox(height: 12),
                   iconOptionsCard(
-                    'Douleurs',
-                    painOptions,
-                    _pain,
-                    (v) => setState(() => _pain = v),
+                    title: "Douleurs",
+                    labels: ["Tête", "Dos", "Ventre", "Poitrine", "Ovaires"],
+                    icons: [
+                      "assets/images/head.png",
+                      "assets/images/back.png",
+                      "assets/images/stomach.png",
+                      "assets/images/chest.png",
+                      "assets/images/uterus.png",
+                    ],
+                    context: context,
+                    selected: [],
+                    onChanged: (val) => print("Douleurs sélectionnées: $val"),
+                    singleSelection: false,
+
+                    inactiveColor: Theme.of(context).colorScheme.secondary,
+                    activeColor: Theme.of(
+                      context,
+                    ).colorScheme.secondaryContainer,
+                    onColor: Theme.of(context).colorScheme.onSecondary,
                   ),
                   SizedBox(height: 12),
                   iconOptionsCard(
-                    'Humeurs',
-                    moodOptions,
-                    _mood,
-                    (v) => setState(() => _mood = v),
-                  ),
-                  SizedBox(height: 12),
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: TextField(
-                        controller: _notesController,
-                        maxLines: 4,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Notes (optionnel)',
-                        ),
-                      ),
-                    ),
+                    title: "Humeurs",
+                    labels: ["Triste", "Neutre", "Heureuse", "Irritée"],
+                    icons: [
+                      "assets/icons/sad.svg",
+                      "assets/icons/neutre.svg",
+                      "assets/icons/happy.svg",
+                      "assets/icons/irritated.svg",
+                    ],
+                    context: context,
+                    selected: [],
+                    onChanged: (val) => print("Douleurs sélectionnées: $val"),
+                    singleSelection: false,
+                    inactiveColor: Theme.of(context).colorScheme.primary,
+                    activeColor: Theme.of(context).colorScheme.primaryContainer,
+                    onColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                   SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed:
-                              _todayEntry != null &&
-                                  DateFormat(
-                                        'yyyy-MM-dd',
-                                      ).format(_selectedDate) ==
-                                      DateFormat(
-                                        'yyyy-MM-dd',
-                                      ).format(DateTime.now())
-                              ? null
-                              : _save,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFF48FB1),
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: Text(
-                            _todayEntry != null &&
-                                    DateFormat(
-                                          'yyyy-MM-dd',
-                                        ).format(_selectedDate) ==
-                                        DateFormat(
-                                          'yyyy-MM-dd',
-                                        ).format(DateTime.now())
-                                ? 'Déjà saisi'
-                                : 'Enregistrer',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 30),
                 ],
               ),
             ),
