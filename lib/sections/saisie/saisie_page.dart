@@ -36,6 +36,9 @@ class _SaisiePageState extends State<SaisiePage> {
     Navigator.pushReplacementNamed(context, _routes[index]);
   }
 
+  List<String> _selectedGlaire = []; // single selection (0 ou 1 item)
+  List<String> _selectedDouleurs = []; // multi
+  List<String> _selectedHumeurs = []; // multi
   final TextEditingController _tempController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   final StorageService _storage = StorageService();
@@ -173,16 +176,22 @@ class _SaisiePageState extends State<SaisiePage> {
                       "assets/images/stretchy.png",
                     ],
                     context: context,
-                    selected: [], // une seule valeur
-                    onChanged: (val) => print("Glaire sélectionnée: $val"),
+                    selected: _selectedGlaire, // IMPORTANT : state local
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedGlaire =
+                            val; // val is a list with 0 or 1 element
+                      });
+                    },
                     singleSelection: true,
-                    activeColor: Theme.of(context).colorScheme.tertiary,
                     inactiveColor: Theme.of(
                       context,
                     ).colorScheme.tertiaryContainer,
-                    onColor: Theme.of(context).colorScheme.onTertiary,
+                    activeColor: Theme.of(context).colorScheme.tertiary,
                   ),
-                  SizedBox(height: 12),
+
+                  const SizedBox(height: 12),
+
                   iconOptionsCard(
                     title: "Douleurs",
                     labels: ["Tête", "Dos", "Ventre", "Poitrine", "Ovaires"],
@@ -194,17 +203,21 @@ class _SaisiePageState extends State<SaisiePage> {
                       "assets/images/uterus.png",
                     ],
                     context: context,
-                    selected: [],
-                    onChanged: (val) => print("Douleurs sélectionnées: $val"),
+                    selected: _selectedDouleurs,
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedDouleurs = val; // multi-selection
+                      });
+                    },
                     singleSelection: false,
-
-                    inactiveColor: Theme.of(context).colorScheme.secondary,
-                    activeColor: Theme.of(
+                    inactiveColor: Theme.of(
                       context,
                     ).colorScheme.secondaryContainer,
-                    onColor: Theme.of(context).colorScheme.onSecondary,
+                    activeColor: Theme.of(context).colorScheme.secondary,
                   ),
-                  SizedBox(height: 12),
+
+                  const SizedBox(height: 12),
+
                   iconOptionsCard(
                     title: "Humeurs",
                     labels: ["Triste", "Neutre", "Heureuse", "Irritée"],
@@ -215,13 +228,19 @@ class _SaisiePageState extends State<SaisiePage> {
                       "assets/icons/irritated.svg",
                     ],
                     context: context,
-                    selected: [],
-                    onChanged: (val) => print("Douleurs sélectionnées: $val"),
+                    selected: _selectedHumeurs,
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedHumeurs = val;
+                      });
+                    },
                     singleSelection: false,
-                    inactiveColor: Theme.of(context).colorScheme.primary,
-                    activeColor: Theme.of(context).colorScheme.primaryContainer,
-                    onColor: Theme.of(context).colorScheme.onPrimary,
+                    activeColor: Theme.of(context).colorScheme.primary,
+                    inactiveColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
                   ),
+
                   SizedBox(height: 18),
                 ],
               ),

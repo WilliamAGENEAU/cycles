@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 Widget saignementCard({
-  required int bleeding,
+  required int bleeding, // -1 = rien sélectionné
   required void Function(int) onChanged,
   required BuildContext context,
 }) {
@@ -37,9 +37,16 @@ Widget saignementCard({
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(4, (i) {
-              final selected = bleeding == i;
+              final bool selected = bleeding == i;
               return GestureDetector(
-                onTap: () => onChanged(i),
+                onTap: () {
+                  if (selected) {
+                    // si on reclique → désélection
+                    onChanged(-1);
+                  } else {
+                    onChanged(i);
+                  }
+                },
                 child: Column(
                   children: [
                     AnimatedContainer(

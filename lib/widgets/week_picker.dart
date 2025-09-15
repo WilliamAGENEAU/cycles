@@ -36,6 +36,7 @@ class _WeekPickerState extends State<WeekPicker> {
     return SizedBox(
       height: 100, // 👈 empêche l'overflow
       child: TableCalendar(
+        locale: 'fr_FR',
         firstDay: DateTime.utc(2010, 1, 1),
         lastDay: DateTime.utc(2030, 12, 31),
         focusedDay: _focusedDay,
@@ -119,7 +120,9 @@ class _WeekPickerState extends State<WeekPicker> {
     required bool isToday,
     required bool isSelected,
   }) {
-    final String letter = DateFormat.E().format(day).substring(0, 1);
+    final String letter = DateFormat.E(
+      'fr_FR',
+    ).format(day).substring(0, 1).toUpperCase();
     final String number = day.day.toString();
 
     return Container(

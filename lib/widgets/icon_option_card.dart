@@ -3,39 +3,183 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Card générique pour options avec icônes SVG ou images
 Widget iconOptionsCard({
   required String title,
-  required List<String> labels, // Noms affichés sous les icônes
+  required List<String> labels, // noms sous les icônes
   required List<String> icons, // chemins des SVG ou PNG/JPG
   required BuildContext context,
-  required List<String> selected, // liste des options sélectionnées
+  required List<String>
+  selected, // liste des options sélectionnées (doit venir du parent)
   required void Function(List<String>) onChanged,
-  bool singleSelection =
-      false, // true = un seul choix (glaire), false = multi (douleurs/humeurs)
-  Color? activeColor, // couleur quand sélectionné
-  Color? inactiveColor, // couleur quand pas sélectionné
-  Color? onColor,
+  bool singleSelection = false, // glaire = true, autres = false
+  Color? activeColor,
+  Color? inactiveColor,
 }) {
   final colorScheme = Theme.of(context).colorScheme;
-  final active = activeColor ?? colorScheme.errorContainer;
-  final inactive = inactiveColor ?? colorScheme.surfaceContainerHighest;
 
-  Widget buildIcon(String path, bool isSelected, Color color) {
-    if (path.toLowerCase().endsWith('.svg')) {
-      return SvgPicture.asset(
-        path,
-        width: 28,
-        height: 28,
-        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-      );
+  // fallback couleurs
+  final Color active = activeColor ?? colorScheme.primaryContainer;
+  final Color inactive = inactiveColor ?? colorScheme.surfaceContainerHighest;
+
+  Widget buildIcon(String path, double size, Color? color) {
+    final isSvg = path.toLowerCase().endsWith('.svg');
+    if (isSvg) {
+      // si color == null -> on garde les couleurs originales du SVG
+      return color != null
+          ? SvgPicture.asset(
+              path,
+              width: size,
+              height: size,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            )
+          : SvgPicture.asset(path, width: size, height: size);
     } else {
+      // PNG/JPG : si color == null on n'applique pas de recolor, sinon on applique tint
       return Image.asset(
         path,
-        width: 48,
-        height: 48,
-        color: null, // Pas de recoloration pour PNG/JPG
+        width: size + 8,
+        height: size + 8,
         fit: BoxFit.contain,
+        color: color, // si null, pas de recolor
+      );
+    }
+  }
+
+  Widget buildOption(int i) {
+    final bool isSelected = selected.contains(labels[i]);
+    final String lowTitle = title.toLowerCase();
+    final bool isHumor =
+        lowTitle.contains('humeur') || lowTitle.contains('humeurs');
+    final bool isPain =
+        lowTitle.contains('douleur') || lowTitle.contains('douleurs');
+    final bool isGlaire =
+        lowTitle.contains('glaire') || lowTitle.contains('glaires');
+
+    // Taille des icônes (humeurs un peu plus grandes)
+    final double iconSize = isHumor ? 36 : 28;
+
+    // Déterminer si on recolore l'icône ; glaires = NO recolor (null)
+    Color? iconColor;
+    if (isGlaire) {
+      iconColor = null; // ne pas recolorer les icônes des glaires
+    } else if (isPain || isHumor) {
+      // douleurs : inactive = blanc, active = noir
+      iconColor = isSelected ? Colors.black : Colors.white;
+    } else {
+      // fallback : recolor avec la logique active/inactiveTheme
+      iconColor = isSelected
+          ? colorScheme.onPrimary
+          : colorScheme.onSurfaceVariant;
+    }
+
+    // couleur du label (garder lisible selon icône recolor)
+    Color labelColor;
+    if (isGlaire) {
+      labelColor = isSelected ? activeColor! : colorScheme.onSurfaceVariant;
+    } else if (isPain) {
+      labelColor = isSelected ? activeColor! : colorScheme.onSurfaceVariant;
+    } else if (isHumor) {
+      labelColor = isSelected ? activeColor! : colorScheme.onSurfaceVariant;
+    } else {
+      labelColor = isSelected
+          ? colorScheme.onPrimary
+          : colorScheme.onSurfaceVariant;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        if (singleSelection) {
+          if (isSelected) {
+            onChanged([]);
+          } else {
+            onChanged([labels[i]]);
+          }
+        } else {
+          final updated = List<String>.from(selected);
+          if (isSelected) {
+            updated.remove(labels[i]);
+          } else {
+            updated.add(labels[i]);
+          }
+          onChanged(updated);
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            height: 64,
+            width: 64,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected ? active : inactive,
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: colorScheme.shadow.withOpacity(0.25),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+            ),
+            child: Center(
+              child: buildIcon(
+                icons[i],
+                iconSize,
+                iconColor, // null => pas de recolor
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 72,
+            child: Text(
+              labels[i],
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: labelColor,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildContent() {
+    if (icons.length <= 4) {
+      // distribution homogène si <= 4 : on utilise Expanded pour répartir sur toute la largeur
+      return Row(
+        children: List.generate(icons.length, (i) {
+          return Expanded(child: Center(child: buildOption(i)));
+        }),
+      );
+    } else {
+      // scroll horizontal si > 4
+      return SizedBox(
+        height: 100,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          itemCount: icons.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 16),
+          itemBuilder: (context, i) {
+            return buildOption(i);
+          },
+        ),
       );
     }
   }
@@ -56,75 +200,8 @@ Widget iconOptionsCard({
               color: colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 100,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: icons.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 16),
-              itemBuilder: (context, i) {
-                final isSelected = selected.contains(labels[i]);
-                return GestureDetector(
-                  onTap: () {
-                    if (singleSelection) {
-                      onChanged([labels[i]]);
-                    } else {
-                      final updated = List<String>.from(selected);
-                      if (isSelected) {
-                        updated.remove(labels[i]);
-                      } else {
-                        updated.add(labels[i]);
-                      }
-                      onChanged(updated);
-                    }
-                  },
-                  child: Column(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isSelected ? active : inactive,
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: colorScheme.shadow.withOpacity(0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : [],
-                        ),
-                        child: Center(
-                          child: buildIcon(
-                            icons[i],
-                            isSelected,
-                            isSelected
-                                ? activeColor!
-                                : (onColor ?? colorScheme.onSurface),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        labels[i],
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected
-                              ? activeColor!
-                              : colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+          const SizedBox(height: 12),
+          buildContent(),
         ],
       ),
     ),
