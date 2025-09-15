@@ -1,6 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:cycles/models/daily_entry.dart';
 import 'package:cycles/services/storage_services.dart';
 import 'package:cycles/values/values.dart';
 import 'package:cycles/widgets/icon_option_card.dart';
@@ -28,6 +25,69 @@ class _SaisiePageState extends State<SaisiePage> {
     StringConst.CALENDRIER_PAGE,
     StringConst.HISTORIQUE_PAGE,
   ];
+  final StorageService _storage = StorageService();
+
+  DateTime _selectedDate = DateTime.now();
+  final TextEditingController _tempController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
+
+  int _bleeding = -1;
+  List<String> _mucusSelected = [];
+  List<String> _painSelected = [];
+  List<String> _moodSelected = [];
+
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadForDate(_selectedDate);
+
+    // Sauvegarde auto pour la température et les notes
+    _tempController.addListener(_saveEntry);
+    _notesController.addListener(_saveEntry);
+  }
+
+  Future<void> _loadForDate(DateTime date) async {
+    setState(() => _loading = true);
+    final entry = await _storage.loadEntryForDate(date);
+    if (entry != null) {
+      _tempController.text = entry.temperature?.toStringAsFixed(2) ?? '';
+      _bleeding = entry.bleeding;
+      _mucusSelected = List<String>.from(entry.mucus);
+      _painSelected = List<String>.from(entry.pain);
+      _moodSelected = List<String>.from(entry.mood);
+      _notesController.text = entry.notes;
+    } else {
+      _tempController.text = '';
+      _bleeding = -1;
+      _mucusSelected = [];
+      _painSelected = [];
+      _moodSelected = [];
+      _notesController.text = '';
+    }
+    setState(() => _loading = false);
+  }
+
+  Future<void> _saveEntry() async {
+    final tempText = _tempController.text.trim();
+    double? temp;
+    if (tempText.isNotEmpty) {
+      temp = double.tryParse(tempText.replaceAll(',', '.'));
+    }
+
+    final entry = DailyEntry(
+      date: _selectedDate,
+      temperature: temp,
+      bleeding: _bleeding,
+      mucus: _mucusSelected,
+      pain: _painSelected,
+      mood: _moodSelected,
+      notes: _notesController.text,
+    );
+
+    await _storage.saveEntry(entry);
+  }
 
   final int _selectedIndex = 2;
 
@@ -36,212 +96,117 @@ class _SaisiePageState extends State<SaisiePage> {
     Navigator.pushReplacementNamed(context, _routes[index]);
   }
 
-  List<String> _selectedGlaire = []; // single selection (0 ou 1 item)
-  List<String> _selectedDouleurs = []; // multi
-  List<String> _selectedHumeurs = []; // multi
-  final TextEditingController _tempController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
-  final StorageService _storage = StorageService();
-  DateTime _selectedDate = DateTime.now();
-  bool _loading = true;
-  DailyEntry? _todayEntry;
-  int _bleeding = 0;
-  String _mucus = 'Aucun';
-  String _pain = 'Aucun';
-  String _mood = 'Neutre';
-
-  final List<String> mucusOptions = ['Aucun', 'Sec', 'Collant', 'Clair'];
-  final List<String> painOptions = [
-    'Aucun',
-    'Douleur légère',
-    'Douleur modérée',
-    'Douleur forte',
-  ];
-  final List<String> moodOptions = ['Triste', 'Neutre', 'Heureuse', 'Irritée'];
-
   @override
-  void initState() {
-    super.initState();
-    _loadForDate(_selectedDate);
-  }
-
-  Future<void> _loadForDate(DateTime date) async {
-    setState(() => _loading = true);
-    final entry = await _storage.loadEntryForDate(date);
-    if (entry != null) {
-      _tempController.text = entry.temperature.toStringAsFixed(2);
-      _bleeding = entry.bleedingLevel;
-      _mucus = entry.mucus;
-      _pain = entry.pain;
-      _mood = entry.mood;
-      _notesController.text = entry.notes;
-    } else {
-      _tempController.text = '';
-      _bleeding = 0;
-      _mucus = 'Aucun';
-      _pain = 'Aucun';
-      _mood = 'Neutre';
-      _notesController.text = '';
-    }
-    setState(() {
-      _todayEntry = entry;
-      _loading = false;
-    });
-  }
-
-  Future<void> _save() async {
-    if (_tempController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Veuillez renseigner la température')),
-      );
-      return;
-    }
-    final temp = double.tryParse(_tempController.text.replaceAll(',', '.'));
-    if (temp == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Format de température invalide')));
-      return;
-    }
-
-    final entry = DailyEntry(
-      date: _selectedDate,
-      temperature: temp,
-      bleedingLevel: _bleeding,
-      mucus: _mucus,
-      pain: _pain,
-      mood: _mood,
-      notes: _notesController.text,
-    );
-
-    await _storage.saveEntry(entry);
-    setState(() => _todayEntry = entry);
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Saisie enregistrée')));
+  void dispose() {
+    _tempController.dispose();
+    _notesController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final dateLabel = DateFormat.yMMMMd('fr_FR').format(_selectedDate);
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Saisie journalière'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () {},
-        ),
-        title: Text(
-          'Saisie journalière',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
-        ),
+        centerTitle: false,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: _loading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   WeekPicker(
                     selectedDate: _selectedDate,
-                    onDateSelected: (date) {
-                      setState(() {
-                        _selectedDate = date;
-                      });
+                    onDateSelected: (d) async {
+                      _selectedDate = d;
+                      await _loadForDate(d);
                     },
-                    onLoadForDate: (date) async {},
+                    onLoadForDate: (d) async => await _loadForDate(d),
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    dateLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
 
-                  SizedBox(height: 12),
+                  // Temperature
                   temperatureCard(
                     controller: _tempController,
                     context: context,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
+
+                  // Saignement
                   saignementCard(
                     bleeding: _bleeding,
-                    onChanged: (v) => setState(() => _bleeding = v),
+                    onChanged: (v) {
+                      setState(() => _bleeding = v);
+                      _saveEntry();
+                    },
                     context: context,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
+
+                  // Glaires
                   iconOptionsCard(
-                    title: "Glaires",
-                    labels: ["Sèches", "Visqueuses", "Crémeuses", "Élastiques"],
-                    icons: [
-                      "assets/images/dry.png",
-                      "assets/images/creamy.png",
-                      "assets/images/clear.png",
-                      "assets/images/stretchy.png",
-                    ],
+                    title: 'Glaires',
+                    labels: AppValues.mucusLabels,
+                    icons: AppValues.mucusIcons,
                     context: context,
-                    selected: _selectedGlaire, // IMPORTANT : state local
+                    selected: _mucusSelected,
                     onChanged: (val) {
-                      setState(() {
-                        _selectedGlaire =
-                            val; // val is a list with 0 or 1 element
-                      });
+                      setState(() => _mucusSelected = val);
+                      _saveEntry();
                     },
                     singleSelection: true,
-                    inactiveColor: Theme.of(
-                      context,
-                    ).colorScheme.tertiaryContainer,
-                    activeColor: Theme.of(context).colorScheme.tertiary,
+                    activeColor: theme.colorScheme.tertiary,
+                    inactiveColor: theme.colorScheme.tertiaryContainer,
                   ),
-
                   const SizedBox(height: 12),
 
+                  // Douleurs
                   iconOptionsCard(
-                    title: "Douleurs",
-                    labels: ["Tête", "Dos", "Ventre", "Poitrine", "Ovaires"],
-                    icons: [
-                      "assets/images/head.png",
-                      "assets/images/back.png",
-                      "assets/images/stomach.png",
-                      "assets/images/chest.png",
-                      "assets/images/uterus.png",
-                    ],
+                    title: 'Douleurs',
+                    labels: AppValues.painLabels,
+                    icons: AppValues.painIcons,
                     context: context,
-                    selected: _selectedDouleurs,
+                    selected: _painSelected,
                     onChanged: (val) {
-                      setState(() {
-                        _selectedDouleurs = val; // multi-selection
-                      });
+                      setState(() => _painSelected = val);
+                      _saveEntry();
                     },
                     singleSelection: false,
-                    inactiveColor: Theme.of(
-                      context,
-                    ).colorScheme.secondaryContainer,
-                    activeColor: Theme.of(context).colorScheme.secondary,
+                    activeColor: theme.colorScheme.secondary,
+                    inactiveColor: theme.colorScheme.secondaryContainer,
                   ),
-
                   const SizedBox(height: 12),
 
+                  // Humeurs
                   iconOptionsCard(
-                    title: "Humeurs",
-                    labels: ["Triste", "Neutre", "Heureuse", "Irritée"],
-                    icons: [
-                      "assets/icons/sad.svg",
-                      "assets/icons/neutre.svg",
-                      "assets/icons/happy.svg",
-                      "assets/icons/irritated.svg",
-                    ],
+                    title: 'Humeurs',
+                    labels: AppValues.moodLabels,
+                    icons: AppValues.moodIcons,
                     context: context,
-                    selected: _selectedHumeurs,
+                    selected: _moodSelected,
                     onChanged: (val) {
-                      setState(() {
-                        _selectedHumeurs = val;
-                      });
+                      setState(() => _moodSelected = val);
+                      _saveEntry();
                     },
                     singleSelection: false,
-                    activeColor: Theme.of(context).colorScheme.primary,
-                    inactiveColor: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer,
+                    activeColor: theme.colorScheme.primary,
+                    inactiveColor: theme.colorScheme.primaryContainer,
                   ),
 
-                  SizedBox(height: 18),
+                  const SizedBox(height: 18),
                 ],
               ),
             ),
