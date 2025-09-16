@@ -1,15 +1,12 @@
 import 'package:cycles/services/storage_services.dart';
-import 'package:cycles/values/values.dart';
-import 'package:cycles/widgets/icon_option_card.dart';
 import 'package:cycles/widgets/nav_bar.dart';
-import 'package:cycles/widgets/saignement_card.dart';
-import 'package:cycles/widgets/temperature_card.dart';
-import 'package:cycles/widgets/week_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:menstrual_cycle_widget/ui/menstrual_calender_view.dart';
+import 'package:menstrual_cycle_widget/ui/menstrual_log_period_view.dart';
+import 'package:menstrual_cycle_widget/ui/model/display_symptoms_data.dart';
 
 class SaisiePage extends StatefulWidget {
-  static const String saisiePageRoute = StringConst.SAISIE_PAGE;
+  static const String saisiePageRoute = '/saisie';
 
   const SaisiePage({super.key});
 
@@ -19,11 +16,11 @@ class SaisiePage extends StatefulWidget {
 
 class _SaisiePageState extends State<SaisiePage> {
   static const List<String> _routes = [
-    StringConst.HOME_PAGE,
-    StringConst.ANALYSE_PAGE,
-    StringConst.SAISIE_PAGE,
-    StringConst.CALENDRIER_PAGE,
-    StringConst.HISTORIQUE_PAGE,
+    '/home',
+    '/analyse',
+    '/saisie',
+    '/calendrier',
+    '/historique',
   ];
   final StorageService _storage = StorageService();
 
@@ -103,9 +100,27 @@ class _SaisiePageState extends State<SaisiePage> {
     super.dispose();
   }
 
+  // Correction : fonctions pour les callbacks
+  void _onError(String error) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Erreur: $error')));
+  }
+
+  void _onSuccess(int id) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Saisie enregistrée (id: $id)')));
+    // Tu peux recharger les données ou rafraîchir les graphs ici si besoin
+  }
+
+  int _next(int min, int max) {
+    // Retourne un nombre aléatoire entre min et max
+    return min + (max - min) ~/ 2;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dateLabel = DateFormat.yMMMMd('fr_FR').format(_selectedDate);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -123,90 +138,40 @@ class _SaisiePageState extends State<SaisiePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  WeekPicker(
-                    selectedDate: _selectedDate,
-                    onDateSelected: (d) async {
-                      _selectedDate = d;
-                      await _loadForDate(d);
-                    },
-                    onLoadForDate: (d) async => await _loadForDate(d),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 350, // Hauteur adaptée pour le calendrier
+                    child: MenstrualCycleCalenderView(
+                      themeColor: theme.colorScheme.primary,
+                      daySelectedColor: theme.colorScheme.secondary,
+                      logPeriodText: "Log Period",
+                      backgroundColorCode:
+                          theme.colorScheme.surfaceContainerHigh,
+                      hideInfoView: false,
+                      onDateSelected: (date) {
+                        setState(() {
+                          _selectedDate = date;
+                        });
+                        _loadForDate(date);
+                      },
+                      onDataChanged: (value) {},
+                      hideBottomBar: false,
+                      hideLogPeriodButton: false,
+                      isExpanded: false,
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    dateLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  SizedBox(
+                    height: 550, // Ajoute une hauteur fixe pour le log period
+                    child: MenstrualLogPeriodView(
+                      displaySymptomsData: DisplaySymptomsData(),
+                      onError: _onError,
+                      onSuccess: _onSuccess,
+                      symptomsLogDate: DateTime.now().add(
+                        Duration(days: _next(1, 5)),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-
-                  // Temperature
-                  temperatureCard(
-                    controller: _tempController,
-                    context: context,
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Saignement
-                  saignementCard(
-                    bleeding: _bleeding,
-                    onChanged: (v) {
-                      setState(() => _bleeding = v);
-                      _saveEntry();
-                    },
-                    context: context,
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Glaires
-                  iconOptionsCard(
-                    title: 'Glaires',
-                    labels: AppValues.mucusLabels,
-                    icons: AppValues.mucusIcons,
-                    context: context,
-                    selected: _mucusSelected,
-                    onChanged: (val) {
-                      setState(() => _mucusSelected = val);
-                      _saveEntry();
-                    },
-                    singleSelection: true,
-                    activeColor: theme.colorScheme.tertiary,
-                    inactiveColor: theme.colorScheme.tertiaryContainer,
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Douleurs
-                  iconOptionsCard(
-                    title: 'Douleurs',
-                    labels: AppValues.painLabels,
-                    icons: AppValues.painIcons,
-                    context: context,
-                    selected: _painSelected,
-                    onChanged: (val) {
-                      setState(() => _painSelected = val);
-                      _saveEntry();
-                    },
-                    singleSelection: false,
-                    activeColor: theme.colorScheme.secondary,
-                    inactiveColor: theme.colorScheme.secondaryContainer,
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Humeurs
-                  iconOptionsCard(
-                    title: 'Humeurs',
-                    labels: AppValues.moodLabels,
-                    icons: AppValues.moodIcons,
-                    context: context,
-                    selected: _moodSelected,
-                    onChanged: (val) {
-                      setState(() => _moodSelected = val);
-                      _saveEntry();
-                    },
-                    singleSelection: false,
-                    activeColor: theme.colorScheme.primary,
-                    inactiveColor: theme.colorScheme.primaryContainer,
-                  ),
-
-                  const SizedBox(height: 18),
                 ],
               ),
             ),
