@@ -27,7 +27,7 @@ class AppDatabase {
 
     _database = await openDatabase(
       path,
-      version: 6,
+      version: 7, // ⬆️ Nouvelle version (6 -> 7)
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -35,25 +35,29 @@ class AppDatabase {
   }
 
   Future _createDB(Database db, int version) async {
+    // --- Table des périodes ---
     await db.execute('''
-        CREATE TABLE periods (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            start_date INTEGER NOT NULL,
-            end_date INTEGER NOT NULL,
-            total_days INTEGER NOT NULL
-        )
-      ''');
+      CREATE TABLE periods (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          start_date INTEGER NOT NULL,
+          end_date INTEGER NOT NULL,
+          total_days INTEGER NOT NULL
+      )
+    ''');
+
+    // --- Table des logs journaliers ---
     await db.execute('''
       CREATE TABLE period_logs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           date TEXT NOT NULL,
-          symptoms  TEXT,
+          symptoms TEXT,
           flow INTEGER NOT NULL,
           painLevel INTEGER NOT NULL,
+          temperature REAL, -- ✅ nouvelle colonne
           period_id INTEGER,
           FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE SET NULL
       )
-      ''');
+    ''');
 
     await _createPillTables(db);
   }
@@ -76,6 +80,10 @@ class AppDatabase {
     if (oldVersion < 6) {
       await db.execute('UPDATE period_logs SET flow = flow + 1 WHERE flow > 0');
     }
+    if (oldVersion < 7) {
+      // ✅ Ajout automatique de la colonne température pour les anciennes DB
+      await db.execute('ALTER TABLE period_logs ADD COLUMN temperature REAL');
+    }
   }
 
   Future<void> _createPillTables(Database db) async {
@@ -88,7 +96,8 @@ class AppDatabase {
         start_date TEXT NOT NULL,
         is_active INTEGER NOT NULL
       )
-      ''');
+    ''');
+
     await db.execute('''
       CREATE TABLE PillIntake (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,7 +108,8 @@ class AppDatabase {
         pill_number_in_cycle INTEGER NOT NULL,
         FOREIGN KEY (regimen_id) REFERENCES PillRegimen (id) ON DELETE CASCADE
       )
-      ''');
+    ''');
+
     await db.execute('''
       CREATE TABLE PillReminder (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,7 +118,7 @@ class AppDatabase {
         is_enabled INTEGER NOT NULL,
         FOREIGN KEY (regimen_id) REFERENCES PillRegimen (id) ON DELETE CASCADE
       )
-      ''');
+    ''');
   }
 
   Future<void> _migrateSymptoms(Database db) async {
@@ -128,9 +138,7 @@ class AppDatabase {
       final int id = row['id'] as int;
       final String? oldSymptomsJson = row['symptoms'] as String?;
 
-      if (oldSymptomsJson == null || oldSymptomsJson.isEmpty) {
-        continue;
-      }
+      if (oldSymptomsJson == null || oldSymptomsJson.isEmpty) continue;
 
       final List<dynamic> oldSymptomList = jsonDecode(oldSymptomsJson);
 

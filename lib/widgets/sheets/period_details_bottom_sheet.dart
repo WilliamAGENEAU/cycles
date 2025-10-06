@@ -30,6 +30,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
   late PainLevel _editedPainLevel;
   late List<Symptom> _editedSymptoms;
   final List<Symptom> _allSymptoms = Symptom.values;
+  double? _editedTemperature; // Pour stocker la valeur en édition
 
   @override
   void initState() {
@@ -54,6 +55,9 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
             .whereType<Symptom>()
             .toList() ??
         [];
+
+    // 🔹 Initialisation de la température
+    _editedTemperature = widget.log.temperature;
   }
 
   void _handleSave() {
@@ -62,6 +66,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
       flow: _editedFlow,
       painLevel: _editedPainLevel.intValue,
       symptoms: symptomsToSave,
+      temperature: _editedTemperature, // 🔹 on sauvegarde la température
     );
 
     widget.onSave(updatedLog);
@@ -83,6 +88,8 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
           const SizedBox(height: 12),
           _buildHeader(context),
           const Divider(height: 24),
+          _buildTemperatureSection(context),
+          const SizedBox(height: 16),
           _buildFlowSection(context),
           const SizedBox(height: 16),
           _buildPainLevelSection(context),
@@ -217,6 +224,89 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
                 },
               );
             }).toList(),
+          ),
+        ],
+      );
+    }
+  }
+
+  Widget _buildTemperatureSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (!_isEditing) {
+      // 🔹 Affichage en mode lecture
+      final temperature = widget.log.temperature;
+
+      if (temperature == null) {
+        return Row(
+          children: [
+            Icon(
+              Icons.thermostat,
+              color: colorScheme.onSurfaceVariant,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text('${l10n.temperature}:', style: textTheme.bodyLarge),
+            const SizedBox(width: 8),
+            Text(
+              l10n.noDataAvailable, // ou "—" si tu veux afficher un tiret
+              style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        );
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(Icons.thermostat, color: colorScheme.onSurfaceVariant, size: 22),
+          const SizedBox(width: 12),
+          Text('${l10n.temperature}: ', style: textTheme.bodyLarge),
+          Text(
+            '${temperature.toStringAsFixed(1)} °C',
+            style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ],
+      );
+    } else {
+      // 🔹 Mode édition (saisie manuelle)
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.temperature,
+            style: textTheme.bodyLarge,
+            textAlign: TextAlign.start,
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double
+                .infinity, // <-- pour que le TextFormField prenne toute la largeur
+            child: TextFormField(
+              initialValue: _editedTemperature != null
+                  ? _editedTemperature!.toStringAsFixed(1)
+                  : '',
+              textAlign: TextAlign.center,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                suffixText: '°C',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                hintText: '36.8',
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _editedTemperature = double.tryParse(
+                    value.replaceAll(',', '.'),
+                  );
+                });
+              },
+            ),
           ),
         ],
       );

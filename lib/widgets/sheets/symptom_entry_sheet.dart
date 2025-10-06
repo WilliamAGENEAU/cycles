@@ -19,6 +19,7 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
   final Set<Symptom> _selectedSymptoms = {};
   FlowRate _flowSelection = FlowRate.none;
   PainLevel _painLevel = PainLevel.none;
+  double? _temperature; // 🔹 Ajout du champ température
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -48,22 +50,24 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor,
+                  color: theme.dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
             const SizedBox(height: 12),
+
             // --- Title ---
             Center(
               child: Text(
                 l10n.symptomEntrySheet_logYourDay,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: theme.textTheme.titleLarge,
               ),
             ),
+
             // --- Date Picker ---
             const SizedBox(height: 24),
-            Text(l10n.date, style: Theme.of(context).textTheme.bodySmall),
+            Text(l10n.date, style: theme.textTheme.bodySmall),
             const SizedBox(height: 8),
             FilledButton.tonalIcon(
               icon: const Icon(Icons.calendar_today, size: 18),
@@ -76,9 +80,41 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
               ),
               onPressed: _pickDate,
             ),
+
+            const SizedBox(height: 16),
+
+            // --- 🔹 Température ---
+            Text(l10n.temperature, style: theme.textTheme.bodySmall),
             const SizedBox(height: 8),
+            SizedBox(
+              width: double
+                  .infinity, // <-- pour que le TextFormField prenne toute la largeur
+              child: TextFormField(
+                initialValue: _temperature != null
+                    ? _temperature!.toStringAsFixed(1)
+                    : '',
+                textAlign: TextAlign.start,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  suffixText: '°C',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _temperature = double.tryParse(value.replaceAll(',', '.'));
+                  });
+                },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
             // --- Flow Selection ---
-            Text(l10n.flow, style: Theme.of(context).textTheme.bodySmall),
+            Text(l10n.flow, style: theme.textTheme.bodySmall),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8.0,
@@ -88,52 +124,46 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
                   selected: _flowSelection == flow,
                   onSelected: (isSelected) {
                     setState(() {
-                      if (isSelected) {
-                        _flowSelection = flow;
-                      } else {
-                        _flowSelection = FlowRate.none;
-                      }
+                      _flowSelection = isSelected ? flow : FlowRate.none;
                     });
                   },
                 );
               }).toList(),
             ),
-            const SizedBox(height: 8),
+
+            const SizedBox(height: 16),
+
             // --- Pain Level ---
             Text(
               '${l10n.painLevel_title}: ${_painLevel.getDisplayName(l10n)}',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: PainLevel.values.map((painLevel) {
-                    final bool isSelected = _painLevel == painLevel;
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: PainLevel.values.map((painLevel) {
+                final bool isSelected = _painLevel == painLevel;
+                return IconButton(
+                  icon: Icon(painLevel.icon),
+                  iconSize: 36,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
+                  onPressed: () {
+                    setState(() {
+                      _painLevel = painLevel;
+                    });
+                  },
+                );
+              }).toList(),
+            ),
 
-                    return IconButton(
-                      icon: Icon(painLevel.icon),
-                      iconSize: 36,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                      onPressed: () {
-                        setState(() {
-                          _painLevel = painLevel;
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
+
             // --- Symptoms ---
             Text(
               l10n.symptomEntrySheet_symptomsOptional,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -155,7 +185,9 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
                 );
               }).toList(),
             ),
+
             const SizedBox(height: 24),
+
             // --- Action Buttons ---
             Row(
               children: [
@@ -184,6 +216,8 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
                         'flow': _flowSelection,
                         'symptoms': symptomsToSave,
                         'painLevel': _painLevel.intValue,
+                        'temperature':
+                            _temperature, // 🔹 on renvoie la température
                       });
                     },
                     child: Text(l10n.save),

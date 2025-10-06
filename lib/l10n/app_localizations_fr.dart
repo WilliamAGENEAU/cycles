@@ -593,4 +593,10 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get temperature => 'Température (°C)';
+
+  @override
+  String get noDataAvailable => 'Aucune donnée disponible';
 }

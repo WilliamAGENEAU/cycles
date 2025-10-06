@@ -35,6 +35,9 @@ class PeriodLoggerService {
         symptoms: result['symptoms'] ?? [],
         flow: result['flow'] ?? FlowRate.none,
         painLevel: result['painLevel'] ?? 0,
+        temperature: result['temperature'] != null
+            ? double.tryParse(result['temperature'].toString())
+            : null,
       );
 
       try {

@@ -252,5 +252,9 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "temperature": "Température (°C)",
+    "noDataAvailable": "Aucune donnée disponible"
+
+
 }

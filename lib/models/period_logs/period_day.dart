@@ -12,6 +12,7 @@ class PeriodDay {
   FlowRate flow;
   int painLevel;
   int? periodId;
+  final double? temperature;
 
   PeriodDay({
     this.id,
@@ -20,6 +21,7 @@ class PeriodDay {
     required this.flow,
     required this.painLevel,
     this.periodId,
+    this.temperature,
   });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +32,7 @@ class PeriodDay {
       'flow': flow.intValue,
       'painLevel': painLevel,
       'period_id': periodId,
+      'temperature': temperature,
     };
   }
 
@@ -47,6 +50,9 @@ class PeriodDay {
       flow: FlowRate.values[map['flow'] as int],
       painLevel: map['painLevel'] as int,
       periodId: map['period_id'] as int?,
+      temperature: map['temperature'] != null
+          ? (map['temperature'] as num).toDouble()
+          : null,
     );
   }
 
@@ -57,6 +63,7 @@ class PeriodDay {
     FlowRate? flow,
     int? painLevel,
     int? periodId,
+    double? temperature,
   }) {
     return PeriodDay(
       id: id ?? this.id,
@@ -65,6 +72,7 @@ class PeriodDay {
       flow: flow ?? this.flow,
       painLevel: painLevel ?? this.painLevel,
       periodId: periodId ?? this.periodId,
+      temperature: temperature ?? this.temperature,
     );
   }
 }
