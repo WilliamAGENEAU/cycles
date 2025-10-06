@@ -1,5 +1,5 @@
 import 'package:cycles/l10n/app_localizations.dart';
-import 'package:cycles/models/period_logs/pain_level_enum.dart';
+import 'package:cycles/models/period_logs/humeur_level_enum.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
 import 'package:flutter/material.dart';
 
@@ -48,10 +48,10 @@ class PainBreakdownWidget extends StatelessWidget {
       );
     }
 
-    final painCounts = {for (var level in PainLevel.values) level: 0};
+    final painCounts = {for (var level in Humeur.values) level: 0};
 
     for (final log in logs) {
-      final level = PainLevel.values[log.painLevel];
+      final level = Humeur.values[log.painLevel];
       painCounts[level] = (painCounts[level] ?? 0) + 1;
     }
 
@@ -71,7 +71,7 @@ class PainBreakdownWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            ...PainLevel.values.expand(
+            ...Humeur.values.expand(
               (level) => [
                 _buildBar(
                   context,
@@ -80,7 +80,7 @@ class PainBreakdownWidget extends StatelessWidget {
                   total: totalDays,
                   color: level.color,
                 ),
-                if (level != PainLevel.values.last) const SizedBox(height: 16),
+                if (level != Humeur.values.last) const SizedBox(height: 16),
               ],
             ),
           ],

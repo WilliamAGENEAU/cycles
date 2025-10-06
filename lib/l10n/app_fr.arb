@@ -45,10 +45,10 @@
     "navBar_settings": "Paramètres",
 
     "flowIntensity_none": "Aucun",
-    "flowIntensity_spotting": "Légères pertes",
-    "flowIntensity_light": "Léger",
-    "flowIntensity_moderate": "Modéré",
-    "flowIntensity_heavy": "Abondant",
+    "flowIntensity_spotting": "Légers",
+    "flowIntensity_light": "Modérés",
+    "flowIntensity_moderate": "Abondants",
+    "flowIntensity_heavy": "Très abondants",
 
     "symptom_headache": "Maux de tête",
     "symptom_fatigue": "Fatigue",
@@ -58,12 +58,12 @@
     "symptom_bloating": "Ballonnements",
     "symptom_acne": "Acné",
 
-    "painLevel_title": "Niveau de douleur",
+    "painLevel_title": "Humeur",
     "painLevel_none": "Aucune",
-    "painLevel_mild": "Légère",
-    "painLevel_moderate": "Modérée",
-    "painLevel_severe": "Sévère",
-    "pain_unbearable": "Insupportable",
+    "painLevel_mild": "Anxieuse",
+    "painLevel_moderate": "Irritable",
+    "painLevel_severe": "Triste",
+    "pain_unbearable": "Joyeuse",
 
     "notification_periodTitle": "Règles imminentes",
     "notification_periodBody": "{count, plural, =1{Your next period is estimated to start in 1 day.} other{Your next period is estimated to start in {count} days.}}",

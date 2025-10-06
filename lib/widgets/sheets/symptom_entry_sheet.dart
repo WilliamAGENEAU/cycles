@@ -1,8 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:cycles/l10n/app_localizations.dart';
 import 'package:cycles/models/flows/flow_enum.dart';
-import 'package:cycles/models/period_logs/pain_level_enum.dart';
+import 'package:cycles/models/period_logs/humeur_level_enum.dart';
 import 'package:cycles/models/period_logs/symptom_enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 class SymptomEntrySheet extends StatefulWidget {
@@ -18,7 +21,7 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
   late DateTime _selectedDate;
   final Set<Symptom> _selectedSymptoms = {};
   FlowRate _flowSelection = FlowRate.none;
-  PainLevel _painLevel = PainLevel.none;
+  Humeur _painLevel = Humeur.none;
   double? _temperature; // 🔹 Ajout du champ température
 
   @override
@@ -116,19 +119,61 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
             // --- Flow Selection ---
             Text(l10n.flow, style: theme.textTheme.bodySmall),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8.0,
-              children: FlowRate.periodFlows.map((flow) {
-                return ChoiceChip(
-                  label: Text(flow.getDisplayName(l10n)),
-                  selected: _flowSelection == flow,
-                  onSelected: (isSelected) {
-                    setState(() {
-                      _flowSelection = isSelected ? flow : FlowRate.none;
-                    });
-                  },
-                );
-              }).toList(),
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: FlowRate.periodFlows.map((flow) {
+                  final bool isSelected = _flowSelection == flow;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => _flowSelection = flow);
+                    },
+                    child: Column(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 54,
+                          height: 54,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: flow.getColor(context, isSelected),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: flow
+                                          .getColor(context, true)
+                                          .withOpacity(0.5),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          child: SvgPicture.asset(
+                            flow.svgAsset,
+                            colorFilter: ColorFilter.mode(
+                              isSelected
+                                  ? Colors.white
+                                  : theme.colorScheme.onSurfaceVariant,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          flow.getDisplayName(l10n),
+                          style: theme.textTheme.bodySmall!.copyWith(
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -141,7 +186,7 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: PainLevel.values.map((painLevel) {
+              children: Humeur.values.map((painLevel) {
                 final bool isSelected = _painLevel == painLevel;
                 return IconButton(
                   icon: Icon(painLevel.icon),

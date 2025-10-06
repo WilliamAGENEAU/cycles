@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-PeriodDay _log(String date, {FlowRate flow = FlowRate.medium}) => PeriodDay(
+PeriodDay _log(String date, {FlowRate flow = FlowRate.moderes}) => PeriodDay(
   date: DateTime.parse(date),
   flow: flow,
   symptoms: [],
@@ -53,11 +53,11 @@ void main() {
 
       test('updating a log flow should not affect period structure', () async {
         final logToUpdate = await repository.createPeriodLog(
-          _log('2025-09-01', flow: FlowRate.medium),
+          _log('2025-09-01', flow: FlowRate.abondants),
         );
         await repository.createPeriodLog(_log('2025-09-02'));
 
-        final updatedLog = logToUpdate.copyWith(flow: FlowRate.heavy);
+        final updatedLog = logToUpdate.copyWith(flow: FlowRate.tresAbondants);
         await repository.updatePeriodLog(updatedLog);
 
         final periods = await repository.readAllPeriods();
@@ -66,7 +66,7 @@ void main() {
 
         final changedLog = await repository.readPeriodLog(logToUpdate.id!);
 
-        expect(changedLog.flow, FlowRate.heavy);
+        expect(changedLog.flow, FlowRate.tresAbondants);
       });
 
       test('deleting the only log should remove the period entirely', () async {
@@ -240,7 +240,7 @@ void main() {
           final tomorrow = DateTime.now().add(const Duration(days: 1));
           final futureLog = PeriodDay(
             date: tomorrow,
-            flow: FlowRate.medium,
+            flow: FlowRate.abondants,
             painLevel: 0,
             symptoms: [],
           );
@@ -277,7 +277,7 @@ void main() {
 
           final updatedLog = logToUpdate.copyWith(
             date: DateTime.parse('2025-09-01'),
-            flow: FlowRate.light,
+            flow: FlowRate.moderes,
           );
           await repository.updatePeriodLog(updatedLog);
 
@@ -343,10 +343,10 @@ void main() {
         'getMonthlyFlows should return correct flow data for multiple months',
         () async {
           await repository.createPeriodLog(
-            _log('2025-09-01', flow: FlowRate.medium),
+            _log('2025-09-01', flow: FlowRate.abondants),
           );
           await repository.createPeriodLog(
-            _log('2025-08-15', flow: FlowRate.light),
+            _log('2025-08-15', flow: FlowRate.moderes),
           );
 
           final monthlyFlows = await repository.getMonthlyPeriodFlows();
@@ -354,11 +354,11 @@ void main() {
           expect(monthlyFlows.length, 2);
 
           expect(monthlyFlows.firstWhere((m) => m.monthLabel == 'Sep').flows, [
-            FlowRate.medium.index,
+            FlowRate.abondants.index,
           ]);
 
           expect(monthlyFlows.firstWhere((m) => m.monthLabel == 'Aug').flows, [
-            FlowRate.light.index,
+            FlowRate.moderes.index,
           ]);
         },
       );
@@ -446,7 +446,7 @@ void main() {
           var periods = await repository.readAllPeriods();
           expect(periods.length, 2);
 
-          final updatedLog = logToUpdate.copyWith(flow: FlowRate.medium);
+          final updatedLog = logToUpdate.copyWith(flow: FlowRate.abondants);
           await repository.updatePeriodLog(updatedLog);
 
           periods = await repository.readAllPeriods();

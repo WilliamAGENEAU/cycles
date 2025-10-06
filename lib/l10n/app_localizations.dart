@@ -253,25 +253,25 @@ abstract class AppLocalizations {
   /// No description provided for @flowIntensity_spotting.
   ///
   /// In fr, this message translates to:
-  /// **'Légères pertes'**
+  /// **'Légers'**
   String get flowIntensity_spotting;
 
   /// No description provided for @flowIntensity_light.
   ///
   /// In fr, this message translates to:
-  /// **'Léger'**
+  /// **'Modérés'**
   String get flowIntensity_light;
 
   /// No description provided for @flowIntensity_moderate.
   ///
   /// In fr, this message translates to:
-  /// **'Modéré'**
+  /// **'Abondants'**
   String get flowIntensity_moderate;
 
   /// No description provided for @flowIntensity_heavy.
   ///
   /// In fr, this message translates to:
-  /// **'Abondant'**
+  /// **'Très abondants'**
   String get flowIntensity_heavy;
 
   /// No description provided for @symptom_headache.
@@ -319,7 +319,7 @@ abstract class AppLocalizations {
   /// No description provided for @painLevel_title.
   ///
   /// In fr, this message translates to:
-  /// **'Niveau de douleur'**
+  /// **'Humeur'**
   String get painLevel_title;
 
   /// No description provided for @painLevel_none.
@@ -331,25 +331,25 @@ abstract class AppLocalizations {
   /// No description provided for @painLevel_mild.
   ///
   /// In fr, this message translates to:
-  /// **'Légère'**
+  /// **'Anxieuse'**
   String get painLevel_mild;
 
   /// No description provided for @painLevel_moderate.
   ///
   /// In fr, this message translates to:
-  /// **'Modérée'**
+  /// **'Irritable'**
   String get painLevel_moderate;
 
   /// No description provided for @painLevel_severe.
   ///
   /// In fr, this message translates to:
-  /// **'Sévère'**
+  /// **'Triste'**
   String get painLevel_severe;
 
   /// No description provided for @pain_unbearable.
   ///
   /// In fr, this message translates to:
-  /// **'Insupportable'**
+  /// **'Joyeuse'**
   String get pain_unbearable;
 
   /// No description provided for @notification_periodTitle.

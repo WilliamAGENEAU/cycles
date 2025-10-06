@@ -20,7 +20,7 @@ class PeriodsRepository {
     try {
       final newLog = PeriodDay(
         date: DateTime.now(),
-        flow: FlowRate.medium,
+        flow: FlowRate.abondants,
         painLevel: 0,
       );
 

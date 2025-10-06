@@ -1,9 +1,12 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:cycles/l10n/app_localizations.dart';
 import 'package:cycles/models/flows/flow_enum.dart';
-import 'package:cycles/models/period_logs/pain_level_enum.dart';
+import 'package:cycles/models/period_logs/humeur_level_enum.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
 import 'package:cycles/models/period_logs/symptom_enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 class PeriodDetailsBottomSheet extends StatefulWidget {
@@ -27,7 +30,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
   bool _isEditing = false;
 
   late FlowRate _editedFlow;
-  late PainLevel _editedPainLevel;
+  late Humeur _editedPainLevel;
   late List<Symptom> _editedSymptoms;
   final List<Symptom> _allSymptoms = Symptom.values;
   double? _editedTemperature; // Pour stocker la valeur en édition
@@ -40,7 +43,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
 
   void _resetEditableState() {
     _editedFlow = widget.log.flow;
-    _editedPainLevel = PainLevel.values[widget.log.painLevel];
+    _editedPainLevel = Humeur.values[widget.log.painLevel];
     _editedSymptoms =
         widget.log.symptoms
             ?.map((symptomString) {
@@ -202,28 +205,67 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
         ],
       );
     } else {
+      // --- Mode édition avec icônes SVG modernes ---
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('${l10n.periodDetailsSheet_flow}:', style: textTheme.bodyLarge),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8.0,
-            children: FlowRate.periodFlows.map((flow) {
-              return ChoiceChip(
-                label: Text(flow.getDisplayName(l10n)),
-                selected: _editedFlow == flow,
-                onSelected: (isSelected) {
-                  setState(() {
-                    if (isSelected) {
-                      _editedFlow = flow;
-                    } else {
-                      _editedFlow = FlowRate.none;
-                    }
-                  });
-                },
-              );
-            }).toList(),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: FlowRate.periodFlows.map((flow) {
+                final bool isSelected = _editedFlow == flow;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() => _editedFlow = flow);
+                  },
+                  child: Column(
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: flow.getColor(context, isSelected),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: flow
+                                        .getColor(context, true)
+                                        .withOpacity(0.5),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: SvgPicture.asset(
+                          flow.svgAsset,
+                          colorFilter: ColorFilter.mode(
+                            isSelected
+                                ? Colors.white
+                                : colorScheme.onSurfaceVariant,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        flow.getDisplayName(l10n),
+                        style: textTheme.bodySmall!.copyWith(
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ],
       );
@@ -319,7 +361,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (!_isEditing) {
-      final painLevel = PainLevel.values[widget.log.painLevel];
+      final painLevel = Humeur.values[widget.log.painLevel];
 
       return Row(
         children: [
@@ -343,7 +385,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: PainLevel.values.map((painLevel) {
+            children: Humeur.values.map((painLevel) {
               final bool isSelected = _editedPainLevel == painLevel;
 
               return IconButton(

@@ -1,20 +1,20 @@
 import 'package:cycles/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-enum PainLevel { none, mild, moderate, severe, unbearable }
+enum Humeur { none, anxieux, irritable, triste, joyeux }
 
-extension FlowExtension on PainLevel {
+extension FlowExtension on Humeur {
   String getDisplayName(AppLocalizations l10n) {
     switch (this) {
-      case PainLevel.none:
+      case Humeur.none:
         return l10n.painLevel_none;
-      case PainLevel.mild:
+      case Humeur.anxieux:
         return l10n.painLevel_mild;
-      case PainLevel.moderate:
+      case Humeur.irritable:
         return l10n.painLevel_moderate;
-      case PainLevel.severe:
+      case Humeur.triste:
         return l10n.painLevel_severe;
-      case PainLevel.unbearable:
+      case Humeur.joyeux:
         return l10n.pain_unbearable;
     }
   }
@@ -25,30 +25,30 @@ extension FlowExtension on PainLevel {
 
   IconData get icon {
     switch (this) {
-      case PainLevel.none:
-        return Icons.sentiment_very_satisfied_outlined;
-      case PainLevel.mild:
-        return Icons.sentiment_satisfied_outlined;
-      case PainLevel.moderate:
+      case Humeur.none:
         return Icons.sentiment_neutral_outlined;
-      case PainLevel.severe:
-        return Icons.sentiment_dissatisfied_outlined;
-      case PainLevel.unbearable:
+      case Humeur.anxieux:
         return Icons.sentiment_very_dissatisfied_outlined;
+      case Humeur.irritable:
+        return Icons.sentiment_dissatisfied_outlined;
+      case Humeur.triste:
+        return Icons.mood_bad_outlined;
+      case Humeur.joyeux:
+        return Icons.sentiment_very_satisfied_outlined;
     }
   }
 
   Color get color {
     switch (this) {
-      case PainLevel.none:
+      case Humeur.none:
         return Colors.blue.shade300;
-      case PainLevel.mild:
+      case Humeur.anxieux:
         return Colors.teal.shade300;
-      case PainLevel.moderate:
+      case Humeur.irritable:
         return Colors.amber.shade400;
-      case PainLevel.severe:
+      case Humeur.triste:
         return Colors.red.shade400;
-      case PainLevel.unbearable:
+      case Humeur.joyeux:
         return Colors.purple.shade300;
     }
   }

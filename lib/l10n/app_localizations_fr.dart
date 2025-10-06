@@ -95,16 +95,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get flowIntensity_none => 'Aucun';
 
   @override
-  String get flowIntensity_spotting => 'Légères pertes';
+  String get flowIntensity_spotting => 'Légers';
 
   @override
-  String get flowIntensity_light => 'Léger';
+  String get flowIntensity_light => 'Modérés';
 
   @override
-  String get flowIntensity_moderate => 'Modéré';
+  String get flowIntensity_moderate => 'Abondants';
 
   @override
-  String get flowIntensity_heavy => 'Abondant';
+  String get flowIntensity_heavy => 'Très abondants';
 
   @override
   String get symptom_headache => 'Maux de tête';
@@ -128,22 +128,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get symptom_acne => 'Acné';
 
   @override
-  String get painLevel_title => 'Niveau de douleur';
+  String get painLevel_title => 'Humeur';
 
   @override
   String get painLevel_none => 'Aucune';
 
   @override
-  String get painLevel_mild => 'Légère';
+  String get painLevel_mild => 'Anxieuse';
 
   @override
-  String get painLevel_moderate => 'Modérée';
+  String get painLevel_moderate => 'Irritable';
 
   @override
-  String get painLevel_severe => 'Sévère';
+  String get painLevel_severe => 'Triste';
 
   @override
-  String get pain_unbearable => 'Insupportable';
+  String get pain_unbearable => 'Joyeuse';
 
   @override
   String get notification_periodTitle => 'Règles imminentes';
