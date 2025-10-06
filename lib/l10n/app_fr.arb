@@ -1,0 +1,256 @@
+{
+    "@@locale": "fr",
+    "appTitle": "Cycles",
+
+    "ongoing": "En cours",
+
+    "date": "Date",
+    "time": "Heure",
+
+    "start": "Début",
+    "end": "Fin",
+
+    "day": "Jour",
+    "days": "Jours",
+
+    "dayCount": "{count, plural, one{{count} jour} other{{count} jours}}",
+    "@dayCount": {
+        "description": "Affiche le nombre de jours, en gérant le singulier et le pluriel.",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "example": "5"
+            }
+        }
+    },
+
+    "delete": "Supprimer",
+    "clear": "Effacer",
+    "save": "Enregistrer",
+
+    "ok": "OK",
+    "confirm": "Confirmer",
+    "set": "Définir",
+    "yes": "Oui",
+    "no": "Non",
+    "cancel": "Annuler",
+    "select": "Sélectionner",
+    "close": "Fermer",
+
+    "flow": "Flux",
+
+    "navBar_insights": "Analyses",
+    "navBar_logs": "Journaux",
+    "navBar_pill": "Pilule",
+    "navBar_settings": "Paramètres",
+
+    "flowIntensity_none": "Aucun",
+    "flowIntensity_spotting": "Légères pertes",
+    "flowIntensity_light": "Léger",
+    "flowIntensity_moderate": "Modéré",
+    "flowIntensity_heavy": "Abondant",
+
+    "symptom_headache": "Maux de tête",
+    "symptom_fatigue": "Fatigue",
+    "symptom_cramps": "Crampes",
+    "symptom_nausea": "Nausées",
+    "symptom_moodSwings": "Sautes d’humeur",
+    "symptom_bloating": "Ballonnements",
+    "symptom_acne": "Acné",
+
+    "painLevel_title": "Niveau de douleur",
+    "painLevel_none": "Aucune",
+    "painLevel_mild": "Légère",
+    "painLevel_moderate": "Modérée",
+    "painLevel_severe": "Sévère",
+    "pain_unbearable": "Insupportable",
+
+    "notification_periodTitle": "Règles imminentes",
+    "notification_periodBody": "{count, plural, =1{Your next period is estimated to start in 1 day.} other{Your next period is estimated to start in {count} days.}}",
+    "@notification_periodBody": {
+        "description": "Body for the upcoming period notification.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "notification_periodOverdueTitle": "Règles en retard",
+    "notification_periodOverdueBody": "{count, plural, =1{Vos règles ont 1 jour de retard.} other{Vos règles ont {count} jours de retard.}}",
+    "@notification_periodOverdueBody": {
+        "description": "Body for the overdue period notification.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "notification_pillTitle": "Rappel pilule",
+    "notification_pillBody": "N’oubliez pas de prendre votre pilule aujourd’hui.",
+    "notification_tamponReminderTitle": "Rappel tampon",
+    "notification_tamponReminderBody": "Pensez à changer votre tampon.",
+
+    "mainScreen_insightsPageTitle": "Vos analyses",
+    "mainScreen_pillsPageTitle": "Pilules",
+    "mainScreen_settingsPageTitle": "Paramètres",
+
+    "mainScreen_tooltipSetReminder": "Rappel tampon",
+    "mainScreen_tooltipCancelReminder": "Annuler le rappel",
+    "mainScreen_tooltipLogPeriod": "Enregistrer une période",
+
+    "insightsScreen_errorPrefix": "Erreur :",
+    "insightsScreen_noDataAvailable": "Aucune donnée disponible.",
+
+    "logsScreen_calculatingPrediction": "Calcul de la prédiction...",
+    "logScreen_logAtLeastTwoPeriods": "Enregistrez au moins deux périodes pour estimer le prochain cycle.",
+    "logScreen_nextPeriodEstimate": "Prochaines règles estimées",
+    "logScreen_periodDueToday": "Règles prévues aujourd’hui",
+    "logScreen_periodOverdueBy": "{count, plural, =1{Règles en retard d’1 jour} other{Règles en retard de {count} jours}}",
+     "@logScreen_periodOverdueBy": {
+        "description": "A label showing the total number of days period is overdue.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "logScreen_tamponReminderSetFor": "Rappel tampon défini pour",
+    "logScreen_tamponReminderCancelled": "Rappel tampon annulé.",
+    "logScreen_couldNotCancelReminder": "Impossible d’annuler le rappel.",
+
+    "pillScreen_pillForTodayMarkedAsTaken": "Pilule du jour marquée comme prise.",
+    "pillScreen_pillForTodayMarkedAsSkipped": "Pilule du jour marquée comme oubliée.",
+
+    "settingsScreen_selectHistoryView": "Choisir la vue de l’historique",
+    "settingsScreen_deleteRegimen_question": "Supprimer le traitement ?",
+    "settingsScreen_deleteRegimenDescription": "Cela supprimera votre configuration de pilule actuelle et tous les journaux associés. Cette action est irréversible.",
+    "settingsScreen_allLogsHaveBeenCleared": "Tous les journaux ont été effacés.",
+    "settingsScreen_clearAllLogs_question": "Effacer tous les journaux ?",
+    "settingsScreen_deleteAllLogsDescription": "Cela supprimera définitivement tous vos enregistrements de périodes. Les paramètres de l’application ne seront pas affectés.",
+    "settingsScreen_appearance": "Apparence",
+    "settingsScreen_historyViewStyle": "Style d’historique",
+    "settingsScreen_appTheme": "Thème de l’application",
+    "settingsScreen_themeLight": "Clair",
+    "settingsScreen_themeDark": "Sombre",
+    "settingsScreen_themeSystem": "Système",
+    "settingsScreen_dynamicTheme": "Thème dynamique",
+    "settingsScreen_useWallpaperColors": "Utiliser les couleurs du fond d’écran",
+    "settingsScreen_themeColor": "Couleur du thème",
+    "settingsScreen_pickAColor": "Choisir une couleur",
+    "settingsScreen_view": "Vue",
+    "settingsScreen_birthControl": "Contraception",
+    "settingsScreen_setUpPillRegimen": "Configurer le traitement",
+    "settingsScreen_trackYourDailyPillIntake": "Suivre la prise quotidienne de la pilule",
+    "settingsScreen_dailyPillReminder": "Rappel quotidien de pilule",
+    "settingsScreen_reminderTime": "Heure du rappel",
+    "settingsScreen_periodPredictionAndReminders": "Prédictions et rappels de règles",
+    "settingsScreen_upcomingPeriodReminder": "Rappel de règles à venir",
+    "settingsScreen_remindMeBefore": "Me rappeler avant",
+    "settingsScreen_notificationTime": "Heure de notification",
+    "settingsScreen_overduePeriodReminder": "Rappel de règles en retard",
+    "settingsScreen_remindMeAfter": "Me rappeler après",
+    "settingsScreen_dataManagement": "Gestion des données",
+    "settingsScreen_clearAllLogs": "Effacer tous les journaux",
+    "settingsScreen_clearAllPillData": "Effacer toutes les données de pilule",
+    "settingsScreen_clearAllPillData_question": "Effacer toutes les données de pilule ?",
+    "settingsScreen_deleteAllPillDataDescription": "Cela supprimera définitivement votre traitement, vos rappels et votre historique. Cette action est irréversible.",
+    "settingsScreen_allPillDataCleared": "Toutes les données de pilule ont été effacées.",
+    "settingsScreen_dangerZone": "Zone à risque",
+    "settingsScreen_clearAllLogsSubtitle": "Supprime tout votre historique de règles et de symptômes.",
+    "settingsScreen_clearAllPillDataSubtitle": "Supprime votre traitement et l’historique des prises.",
+    "settingsScreen_security": "Sécurité",
+    "securityScreen_enableBiometricLock": "Activer le verrouillage biométrique",
+    "securityScreen_enableBiometricLockSubtitle": "Exiger une empreinte digitale ou la reconnaissance faciale pour ouvrir l’application.",
+    "securityScreen_noBiometricsAvailable": "Aucun code, empreinte ou reconnaissance faciale détecté. Veuillez en configurer un dans les paramètres de votre appareil.",
+    "settingsScreen_preferences": "Préférences",
+    "preferencesScreen_tamponReminderButton": "Afficher toujours le bouton de rappel",
+    "preferencesScreen_tamponReminderButtonSubtitle": "Affiche en permanence le bouton de rappel tampon sur l’écran principal.",
+    "settingsScreen_about": "À propos",
+    "aboutScreen_version": "Version",
+    "aboutScreen_github": "GitHub",
+    "aboutScreen_githubSubtitle": "Code source et suivi des problèmes",
+    "aboutScreen_share": "Partager",
+    "aboutScreen_shareSubtitle": "Partager l’application avec des amis",
+    "aboutScreen_urlError": "Impossible d’ouvrir le lien.",
+
+    "tamponReminderDialog_tamponReminderTitle": "Rappel tampon",
+    "tamponReminderDialog_tamponReminderMaxDuration": "Durée maximale : 8 heures.",
+
+    "reminderCountdownDialog_title": "Rappel dans",
+    "reminderCountdownDialog_dueAt": "Prévu à {time}",
+    "@reminderCountdownDialog_dueAt": {
+        "description": "Indicates the time a reminder is due. The {time} placeholder will be a formatted time string (e.g., '2:30 PM').",
+        "placeholders": {
+            "time": {}
+        }
+    },
+    "cycleLengthVarianceWidget_LogAtLeastTwoPeriods": "Au moins deux cycles sont nécessaires pour afficher la variance.",
+    "cycleLengthVarianceWidget_cycleAndPeriodVeriance": "Variance du cycle et de la période",
+    "cycleLengthVarianceWidget_averageCycle": "Cycle moyen",
+    "cycleLengthVarianceWidget_averagePeriod": "Période moyenne",
+    "cycleLengthVarianceWidget_period": "Période",
+    "cycleLengthVarianceWidget_cycle": "Cycle",
+
+    "flowIntensityWidget_flowIntensityBreakdown": "Répartition de l’intensité du flux",
+    "flowIntensityWidget_noFlowDataLoggedYet": "Aucune donnée de flux enregistrée pour le moment.",
+
+    "painLevelWidget_noPainDataLoggedYet": "Aucune donnée de douleur enregistrée pour le moment.",
+    "painLevelWidget_painLevelBreakdown": "Répartition des niveaux de douleur",
+
+    "monthlyFlowChartWidget_noDataToDisplay": "Aucune donnée à afficher.",
+    "monthlyFlowChartWidget_cycleFlowPatterns": "Schémas de flux menstruel",
+    "monthlyFlowChartWidget_cycleFlowPatternsDescription": "Chaque ligne représente un cycle complet",
+
+    "symptomFrequencyWidget_noSymptomsLoggedYet": "Aucun symptôme enregistré pour le moment.",
+    "symptomFrequencyWidget_mostCommonSymptoms": "Symptômes les plus fréquents",
+
+    "yearHeatMapWidget_yearlyOverview": "Vue d’ensemble annuelle",
+
+    "journalViewWidget_logYourFirstPeriod": "Enregistrez votre première période.",
+
+    "listViewWidget_noPeriodsLogged": "Aucune période enregistrée.\nAppuyez sur le bouton + pour en ajouter une.",
+    "listViewWidget_confirmDelete": "Confirmer la suppression",
+    "listViewWidget_confirmDeleteDescription": "Voulez-vous vraiment supprimer cette entrée ?",
+
+    "emptyPillStateWidget_noPillRegimenFound": "Aucun traitement trouvé.",
+    "emptyPillStateWidget_noPillRegimenFoundDescription": "Configurez votre traitement dans les paramètres pour commencer le suivi.",
+
+    "pillPackVisualiser_yourPack": "Votre plaquette",
+
+    "pillStatus_pillsOfTotal": "{count, plural, =1{sur 1 pilule} other{sur {count} pilules}}",
+    "@pillStatus_pillsOfTotal": {
+        "description": "A label showing the total number of pills.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "pillStatus_undo": "Annuler",
+    "pillStatus_skip": "Ignorer",
+    "pillStatus_markAsTaken": "Marquer comme prise",
+
+    "regimenSetupWidget_setUpPillRegimen": "Configurer le traitement",
+    "regimenSetupWidget_packName": "Nom de la plaquette",
+    "regimenSetupWidget_pleaseEnterAName": "Veuillez saisir un nom",
+    "regimenSetupWidget_activePills": "Pilules actives",
+    "regimenSetupWidget_enterANumber": "Saisissez un nombre",
+    "regimenSetupWidget_placeboPills": "Pilules placebo",
+    "regimenSetupWidget_firstDayOfThisPack": "Premier jour de cette plaquette",
+
+    "symptomEntrySheet_logYourDay": "Enregistrez votre journée",
+    "symptomEntrySheet_symptomsOptional": "Symptômes (optionnel)",
+
+    "periodDetailsSheet_symptoms": "Symptômes",
+    "periodDetailsSheet_flow": "Flux",
+
+    "periodPredictionCircle_days": "{count, plural, =1{jour} other{jours}}",
+    "@periodPredictionCircle_days": {
+        "description": "A label showing the total number of days until period is due.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
+}
