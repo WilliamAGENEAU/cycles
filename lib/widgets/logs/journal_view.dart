@@ -86,6 +86,9 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         children: [
           Expanded(
             child: TableCalendar(
+              locale: 'fr_FR', // ✅ Affichage en français
+              startingDayOfWeek:
+                  StartingDayOfWeek.monday, // ✅ Lundi = premier jour
               firstDay: earliestLogDate.subtract(const Duration(days: 365)),
               lastDay: calendarBoundary.add(const Duration(days: 365)),
               focusedDay: _focusedDay,

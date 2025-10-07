@@ -125,7 +125,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          DateFormat('EEEE, MMMM d').format(widget.log.date),
+          DateFormat('EEEE d MMMM', 'fr_FR').format(widget.log.date),
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         if (_isEditing)

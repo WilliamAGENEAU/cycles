@@ -3,9 +3,9 @@ import 'package:cycles/models/period_logs/humeur_level_enum.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
 import 'package:flutter/material.dart';
 
-class PainBreakdownWidget extends StatelessWidget {
+class HumeurBreakdownWidget extends StatelessWidget {
   final List<PeriodDay> logs;
-  const PainBreakdownWidget({super.key, required this.logs});
+  const HumeurBreakdownWidget({super.key, required this.logs});
 
   Widget _buildBar(
     BuildContext context, {

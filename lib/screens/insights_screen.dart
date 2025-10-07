@@ -65,7 +65,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
               CycleLengthVarianceWidget(periods: allPeriods),
 
-              PainBreakdownWidget(logs: allLogs),
+              HumeurBreakdownWidget(logs: allLogs),
 
               FlowBreakdownWidget(logs: allLogs),
 
