@@ -2,7 +2,7 @@
 
 import 'package:cycles/l10n/app_localizations.dart';
 import 'package:cycles/models/flows/flow_enum.dart';
-import 'package:cycles/models/period_logs/humeur_level_enum.dart';
+import 'package:cycles/models/period_logs/emotion_level_enum.dart';
 import 'package:cycles/models/period_logs/symptom_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,7 +21,7 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
   late DateTime _selectedDate;
   final Set<Symptom> _selectedSymptoms = {};
   FlowRate _flowSelection = FlowRate.none;
-  Humeur _painLevel = Humeur.none;
+  Emotion _emotionLevel = Emotion.none;
   double? _temperature; // 🔹 Ajout du champ température
 
   @override
@@ -178,31 +178,36 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
 
             const SizedBox(height: 16),
 
-            // --- Pain Level ---
+            // --- Emotion Level ---
             Text(
-              '${l10n.painLevel_title}: ${_painLevel.getDisplayName(l10n)}',
+              '${l10n.painLevel_title}: ${_emotionLevel.getDisplayName(l10n)}',
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: Humeur.values.map((painLevel) {
-                final bool isSelected = _painLevel == painLevel;
-                return IconButton(
-                  icon: Icon(painLevel.icon),
-                  iconSize: 36,
-                  color: isSelected
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant,
-                  onPressed: () {
-                    setState(() {
-                      _painLevel = painLevel;
-                    });
-                  },
-                );
-              }).toList(),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: Emotion.values.map((emotionLevel) {
+                  final bool isSelected = _emotionLevel == emotionLevel;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: IconButton(
+                      icon: Icon(emotionLevel.icon),
+                      iconSize: 36,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                      onPressed: () {
+                        setState(() {
+                          _emotionLevel = emotionLevel;
+                        });
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
-
             const SizedBox(height: 16),
 
             // --- Symptoms ---
@@ -260,7 +265,7 @@ class _SymptomEntrySheetState extends State<SymptomEntrySheet> {
                         'date': _selectedDate,
                         'flow': _flowSelection,
                         'symptoms': symptomsToSave,
-                        'painLevel': _painLevel.intValue,
+                        'painLevel': _emotionLevel.intValue,
                         'temperature':
                             _temperature, // 🔹 on renvoie la température
                       });

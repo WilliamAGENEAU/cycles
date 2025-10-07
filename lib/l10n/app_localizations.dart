@@ -319,38 +319,56 @@ abstract class AppLocalizations {
   /// No description provided for @painLevel_title.
   ///
   /// In fr, this message translates to:
-  /// **'Humeur'**
+  /// **'Émotions'**
   String get painLevel_title;
 
-  /// No description provided for @painLevel_none.
+  /// No description provided for @emotion_aucun.
   ///
   /// In fr, this message translates to:
   /// **'Aucune'**
-  String get painLevel_none;
+  String get emotion_aucun;
 
-  /// No description provided for @painLevel_mild.
+  /// No description provided for @emotion_anxieuse.
   ///
   /// In fr, this message translates to:
   /// **'Anxieuse'**
-  String get painLevel_mild;
+  String get emotion_anxieuse;
 
-  /// No description provided for @painLevel_moderate.
+  /// No description provided for @emotion_colere.
   ///
   /// In fr, this message translates to:
-  /// **'Irritable'**
-  String get painLevel_moderate;
+  /// **'Colère'**
+  String get emotion_colere;
 
-  /// No description provided for @painLevel_severe.
+  /// No description provided for @emotion_triste.
   ///
   /// In fr, this message translates to:
   /// **'Triste'**
-  String get painLevel_severe;
+  String get emotion_triste;
 
-  /// No description provided for @pain_unbearable.
+  /// No description provided for @emotion_heureuse.
   ///
   /// In fr, this message translates to:
-  /// **'Joyeuse'**
-  String get pain_unbearable;
+  /// **'Heureuse'**
+  String get emotion_heureuse;
+
+  /// No description provided for @emotion_bien.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bien'**
+  String get emotion_bien;
+
+  /// No description provided for @emotion_sensible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sensible'**
+  String get emotion_sensible;
+
+  /// No description provided for @emotion_fatiguee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fatiguée'**
+  String get emotion_fatiguee;
 
   /// No description provided for @notification_periodTitle.
   ///
@@ -895,7 +913,7 @@ abstract class AppLocalizations {
   /// No description provided for @painLevelWidget_painLevelBreakdown.
   ///
   /// In fr, this message translates to:
-  /// **'Répartition des niveaux de douleur'**
+  /// **'Répartition des émotions'**
   String get painLevelWidget_painLevelBreakdown;
 
   /// No description provided for @monthlyFlowChartWidget_noDataToDisplay.
@@ -925,7 +943,7 @@ abstract class AppLocalizations {
   /// No description provided for @symptomFrequencyWidget_mostCommonSymptoms.
   ///
   /// In fr, this message translates to:
-  /// **'Symptômes les plus fréquents'**
+  /// **'Douleurs les plus fréquentes'**
   String get symptomFrequencyWidget_mostCommonSymptoms;
 
   /// No description provided for @yearHeatMapWidget_yearlyOverview.
@@ -1083,6 +1101,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucune donnée disponible'**
   String get noDataAvailable;
+
+  /// No description provided for @temperatureChart_description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évolution de la température au cours du mois'**
+  String get temperatureChart_description;
 }
 
 class _AppLocalizationsDelegate

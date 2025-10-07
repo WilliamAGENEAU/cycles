@@ -58,12 +58,16 @@
     "symptom_bloating": "Ballonnements",
     "symptom_acne": "Acné",
 
-    "painLevel_title": "Humeur",
-    "painLevel_none": "Aucune",
-    "painLevel_mild": "Anxieuse",
-    "painLevel_moderate": "Irritable",
-    "painLevel_severe": "Triste",
-    "pain_unbearable": "Joyeuse",
+    "painLevel_title": "Émotions",
+    "emotion_aucun": "Aucune",
+    "emotion_anxieuse": "Anxieuse",
+    "emotion_colere": "Colère",
+    "emotion_triste": "Triste",
+    "emotion_heureuse": "Heureuse",
+    "emotion_bien": "Bien",
+    "emotion_sensible": "Sensible",
+    "emotion_fatiguee": "Fatiguée",
+
 
     "notification_periodTitle": "Règles imminentes",
     "notification_periodBody": "{count, plural, =1{Your next period is estimated to start in 1 day.} other{Your next period is estimated to start in {count} days.}}",
@@ -195,14 +199,14 @@
     "flowIntensityWidget_noFlowDataLoggedYet": "Aucune donnée de flux enregistrée pour le moment.",
 
     "painLevelWidget_noPainDataLoggedYet": "Aucune donnée de douleur enregistrée pour le moment.",
-    "painLevelWidget_painLevelBreakdown": "Répartition des niveaux de douleur",
+    "painLevelWidget_painLevelBreakdown": "Répartition des émotions",
 
     "monthlyFlowChartWidget_noDataToDisplay": "Aucune donnée à afficher.",
     "monthlyFlowChartWidget_cycleFlowPatterns": "Schémas de flux menstruel",
     "monthlyFlowChartWidget_cycleFlowPatternsDescription": "Chaque ligne représente un cycle complet",
 
     "symptomFrequencyWidget_noSymptomsLoggedYet": "Aucun symptôme enregistré pour le moment.",
-    "symptomFrequencyWidget_mostCommonSymptoms": "Symptômes les plus fréquents",
+    "symptomFrequencyWidget_mostCommonSymptoms": "Douleurs les plus fréquentes",
 
     "yearHeatMapWidget_yearlyOverview": "Vue d’ensemble annuelle",
 
@@ -254,7 +258,9 @@
         }
     },
     "temperature": "Température (°C)",
-    "noDataAvailable": "Aucune donnée disponible"
+    "noDataAvailable": "Aucune donnée disponible",
+    "temperatureChart_description": "Évolution de la température au cours du mois"
+
 
 
 }

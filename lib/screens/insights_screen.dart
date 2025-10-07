@@ -1,14 +1,11 @@
 import 'package:cycles/database/repositories/periods_repository.dart';
 import 'package:cycles/l10n/app_localizations.dart';
-import 'package:cycles/models/flows/flow_data.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
 import 'package:cycles/models/periods/period.dart';
 import 'package:cycles/widgets/insights/cycle_length_variance.dart';
-import 'package:cycles/widgets/insights/flow_intensity.dart';
-import 'package:cycles/widgets/insights/monthly_flow.dart';
 import 'package:cycles/widgets/insights/pain_intensity.dart';
 import 'package:cycles/widgets/insights/symptom_frequency.dart';
-import 'package:cycles/widgets/insights/year_heat_map.dart';
+import 'package:cycles/widgets/insights/temperature_chart.dart';
 import 'package:flutter/material.dart';
 
 class InsightsScreen extends StatefulWidget {
@@ -56,22 +53,17 @@ class _InsightsScreenState extends State<InsightsScreen> {
         if (snapshot.hasData) {
           final allPeriods = snapshot.data![0] as List<Period>;
           final allLogs = snapshot.data![1] as List<PeriodDay>;
-          final allFlows = snapshot.data![2] as List<MonthlyFlowData>;
 
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
+              TemperatureChartWidget(logs: allLogs),
+
               SymptomFrequencyWidget(logs: allLogs),
 
               CycleLengthVarianceWidget(periods: allPeriods),
 
               HumeurBreakdownWidget(logs: allLogs),
-
-              FlowBreakdownWidget(logs: allLogs),
-
-              FlowPatternsWidget(monthlyFlowData: allFlows),
-
-              YearHeatmapWidget(logs: allLogs),
             ],
           );
         }

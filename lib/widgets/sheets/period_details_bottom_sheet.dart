@@ -2,7 +2,7 @@
 
 import 'package:cycles/l10n/app_localizations.dart';
 import 'package:cycles/models/flows/flow_enum.dart';
-import 'package:cycles/models/period_logs/humeur_level_enum.dart';
+import 'package:cycles/models/period_logs/emotion_level_enum.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
 import 'package:cycles/models/period_logs/symptom_enum.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +30,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
   bool _isEditing = false;
 
   late FlowRate _editedFlow;
-  late Humeur _editedPainLevel;
+  late Emotion _editedPainLevel;
   late List<Symptom> _editedSymptoms;
   final List<Symptom> _allSymptoms = Symptom.values;
   double? _editedTemperature; // Pour stocker la valeur en édition
@@ -43,7 +43,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
 
   void _resetEditableState() {
     _editedFlow = widget.log.flow;
-    _editedPainLevel = Humeur.values[widget.log.painLevel];
+    _editedPainLevel = Emotion.values[widget.log.painLevel];
     _editedSymptoms =
         widget.log.symptoms
             ?.map((symptomString) {
@@ -95,7 +95,7 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
           const SizedBox(height: 16),
           _buildFlowSection(context),
           const SizedBox(height: 16),
-          _buildPainLevelSection(context),
+          _buildEmotionLevelSection(context),
           const SizedBox(height: 16),
           _buildSymptomsSection(context),
         ],
@@ -339,7 +339,6 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                hintText: '36.8',
               ),
               onChanged: (value) {
                 setState(() {
@@ -355,13 +354,13 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
     }
   }
 
-  Widget _buildPainLevelSection(BuildContext context) {
+  Widget _buildEmotionLevelSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     if (!_isEditing) {
-      final painLevel = Humeur.values[widget.log.painLevel];
+      final painLevel = Emotion.values[widget.log.painLevel];
 
       return Row(
         children: [
@@ -383,24 +382,27 @@ class _PeriodDetailsBottomSheetState extends State<PeriodDetailsBottomSheet> {
             style: textTheme.bodyLarge,
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: Humeur.values.map((painLevel) {
-              final bool isSelected = _editedPainLevel == painLevel;
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: Emotion.values.map((painLevel) {
+                final bool isSelected = _editedPainLevel == painLevel;
 
-              return IconButton(
-                icon: Icon(painLevel.icon),
-                iconSize: 36,
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-                onPressed: () {
-                  setState(() {
-                    _editedPainLevel = painLevel;
-                  });
-                },
-              );
-            }).toList(),
+                return IconButton(
+                  icon: Icon(painLevel.icon),
+                  iconSize: 36,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                  onPressed: () {
+                    setState(() {
+                      _editedPainLevel = painLevel;
+                    });
+                  },
+                );
+              }).toList(),
+            ),
           ),
         ],
       );

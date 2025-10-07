@@ -128,22 +128,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get symptom_acne => 'Acné';
 
   @override
-  String get painLevel_title => 'Humeur';
+  String get painLevel_title => 'Émotions';
 
   @override
-  String get painLevel_none => 'Aucune';
+  String get emotion_aucun => 'Aucune';
 
   @override
-  String get painLevel_mild => 'Anxieuse';
+  String get emotion_anxieuse => 'Anxieuse';
 
   @override
-  String get painLevel_moderate => 'Irritable';
+  String get emotion_colere => 'Colère';
 
   @override
-  String get painLevel_severe => 'Triste';
+  String get emotion_triste => 'Triste';
 
   @override
-  String get pain_unbearable => 'Joyeuse';
+  String get emotion_heureuse => 'Heureuse';
+
+  @override
+  String get emotion_bien => 'Bien';
+
+  @override
+  String get emotion_sensible => 'Sensible';
+
+  @override
+  String get emotion_fatiguee => 'Fatiguée';
 
   @override
   String get notification_periodTitle => 'Règles imminentes';
@@ -477,8 +486,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune donnée de douleur enregistrée pour le moment.';
 
   @override
-  String get painLevelWidget_painLevelBreakdown =>
-      'Répartition des niveaux de douleur';
+  String get painLevelWidget_painLevelBreakdown => 'Répartition des émotions';
 
   @override
   String get monthlyFlowChartWidget_noDataToDisplay =>
@@ -498,7 +506,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get symptomFrequencyWidget_mostCommonSymptoms =>
-      'Symptômes les plus fréquents';
+      'Douleurs les plus fréquentes';
 
   @override
   String get yearHeatMapWidget_yearlyOverview => 'Vue d’ensemble annuelle';
@@ -599,4 +607,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noDataAvailable => 'Aucune donnée disponible';
+
+  @override
+  String get temperatureChart_description =>
+      'Évolution de la température au cours du mois';
 }
