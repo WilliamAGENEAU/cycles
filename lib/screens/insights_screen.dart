@@ -57,7 +57,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              TemperatureCycleChart(logs: allLogs),
+              TemperatureCycleChart(logs: allLogs, periods: allPeriods),
 
               SymptomFrequencyWidget(logs: allLogs),
 

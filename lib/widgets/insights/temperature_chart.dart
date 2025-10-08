@@ -6,10 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cycles/models/flows/flow_enum.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
+import 'package:cycles/models/periods/period.dart';
 
 class TemperatureCycleChart extends StatefulWidget {
   final List<PeriodDay> logs;
-  const TemperatureCycleChart({super.key, required this.logs});
+  final List<Period> periods;
+
+  const TemperatureCycleChart({
+    super.key,
+    required this.logs,
+    required this.periods,
+  });
 
   @override
   State<TemperatureCycleChart> createState() => _TemperatureCycleChartState();
@@ -26,57 +33,41 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
   }
 
   void _initCycles() {
-    final sortedLogs = [...widget.logs]
-      ..sort((a, b) => a.date.compareTo(b.date));
-
-    if (sortedLogs.isEmpty) {
+    if (widget.periods.isEmpty) {
       _cycles = [];
       return;
     }
 
+    final sortedPeriods = [...widget.periods]
+      ..sort((a, b) => a.startDate.compareTo(b.startDate));
+
     final List<Map<String, DateTime>> cycles = [];
-    DateTime? currentStart;
 
-    for (int i = 0; i < sortedLogs.length; i++) {
-      final current = sortedLogs[i];
-      final prev = i > 0 ? sortedLogs[i - 1] : null;
+    for (int i = 0; i < sortedPeriods.length; i++) {
+      final start = sortedPeriods[i].startDate;
+      DateTime end;
 
-      // Si flux ce jour ET (pas de jour précédent OU jour précédent sans flux)
-      if (current.flow != FlowRate.none &&
-          (prev == null || prev.flow == FlowRate.none)) {
-        currentStart = current.date;
+      if (i < sortedPeriods.length - 1) {
+        // Fin du cycle = veille du prochain début de règles
+        end = sortedPeriods[i + 1].startDate.subtract(const Duration(days: 1));
+      } else {
+        // Dernier cycle : jusqu’à aujourd’hui
+        end = DateTime.now();
       }
 
-      final next = i < sortedLogs.length - 1 ? sortedLogs[i + 1] : null;
-
-      // Détecte fin de cycle: soit prochain flux démarre -> fin = veille du prochain flux,
-      // soit dernier log -> fin = today
-      if (currentStart != null &&
-          (next == null ||
-              (next.flow != FlowRate.none &&
-                  next.date.isAfter(current.date)))) {
-        DateTime endDate;
-        if (next != null && next.flow != FlowRate.none) {
-          endDate = next.date.subtract(const Duration(days: 1));
-        } else if (next == null) {
-          endDate = DateTime.now();
-        } else {
-          endDate = current.date;
-        }
-
-        if (!endDate.isBefore(currentStart)) {
-          cycles.add({'start': currentStart, 'end': endDate});
-        }
-        currentStart = null;
+      if (!end.isBefore(start)) {
+        cycles.add({'start': start, 'end': end});
       }
-    }
-
-    // Si on est encore dans un cycle en cours
-    if (currentStart != null) {
-      _cycles.add({'start': currentStart, 'end': DateTime.now()});
     }
 
     _cycles = cycles;
+
+    // Sélection du cycle en cours (celui qui contient aujourd’hui)
+    final now = DateTime.now();
+    final indexCurrent = _cycles.lastIndexWhere(
+      (c) => !now.isBefore(c['start']!) && !now.isAfter(c['end']!),
+    );
+    _currentCycleIndex = indexCurrent >= 0 ? indexCurrent : _cycles.length - 1;
   }
 
   void _nextCycle() {
@@ -101,6 +92,7 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
     final start = cycle['start']!;
     final end = cycle['end']!;
 
+    // Logs appartenant à ce cycle
     final cycleLogs =
         widget.logs
             .where((log) => !log.date.isBefore(start) && !log.date.isAfter(end))
@@ -111,7 +103,7 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
       return const Center(child: Text('Aucune donnée de température.'));
     }
 
-    // Création des points de température (1..N : jours du cycle)
+    // Points de température
     final spots = <FlSpot>[];
     for (final log in cycleLogs) {
       if (log.temperature == null) continue;
@@ -121,13 +113,13 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
 
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
     final cycleLength = end.difference(start).inDays + 1;
-    // minY/maxY calculés sur les températures disponibles
+
     final temps = cycleLogs
         .where((l) => l.temperature != null)
         .map((l) => l.temperature!)
         .toList();
+
     final double minY = (temps.isNotEmpty
         ? temps.reduce((a, b) => a < b ? a : b) - 0.3
         : 35);
@@ -136,9 +128,9 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
         : 38);
 
     return Card(
-      elevation: 3,
       margin: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -166,7 +158,7 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               "Évolution de la température au cours du cycle",
               style: textTheme.bodyMedium?.copyWith(
@@ -175,44 +167,33 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
             ),
             const SizedBox(height: 16),
 
-            // --- GRAPHIQUE ---
-            // augmenter la hauteur pour laisser de la place aux labels inclinés
+            // --- LINE CHART ---
             SizedBox(
               height: 420,
-
               child: LineChart(
                 LineChartData(
                   minX: 1,
                   maxX: cycleLength.toDouble(),
                   minY: minY,
                   maxY: maxY,
-                  lineBarsData: [
-                    // On colorie par point : si jour a flux -> rose, sinon bleu.
-                    // Pour garder une courbe continue tout en colorant segments,
-                    // on génère deux LineChartBarData: une pour les jours "sans flux" (bleue),
-                    // et une pour les jours "avec flux" (rose) — en pratique on doit
-                    // séparer les spots en segments contigus.
-                    ..._buildColoredLineSegments(spots, cycleLogs, colorScheme),
-                  ],
+                  lineBarsData: _buildColoredLineSegments(
+                    spots,
+                    cycleLogs,
+                    colorScheme,
+                    start,
+                  ),
                   titlesData: FlTitlesData(
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 50,
-                        getTitlesWidget: (value, _) => Text(
-                          '${value.toStringAsFixed(1)}°',
-                          style: textTheme.bodySmall,
-                        ),
                       ),
                     ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        // <-- IMPORTANT : augmenter reservedSize pour éviter overflow
-                        reservedSize: 35,
+                        reservedSize: 40,
                         interval: 2,
-                        // margin permet d'ajouter encore de l'espace si nécessaire
-                        // (SideTitles dans certaines versions de fl_chart supporte margin)
                         getTitlesWidget: (value, meta) {
                           final day = value.toInt();
                           if (day < 1 || day > cycleLength) {
@@ -228,11 +209,9 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
                                 log.flow != FlowRate.none,
                           );
 
-                          // Column with MainAxisSize.min to avoid expanding vertically
                           return Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // numéro du jour du cycle
                               Text(
                                 '$day',
                                 style: TextStyle(
@@ -244,9 +223,8 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              // date du mois (rotated slightly)
                               Transform.rotate(
-                                angle: -math.pi / 3, // léger angle (~-18°)
+                                angle: -math.pi / 3,
                                 alignment: Alignment.center,
                                 child: Text(
                                   DateFormat('d/MM').format(date),
@@ -271,14 +249,13 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: true,
-                    verticalInterval: 2,
                     horizontalInterval: 0.2,
-                    getDrawingHorizontalLine: (value) => FlLine(
-                      color: colorScheme.onSurface.withOpacity(0.1),
-                      strokeWidth: 1,
-                    ),
                     getDrawingVerticalLine: (value) => FlLine(
                       color: colorScheme.onSurface.withOpacity(0.05),
+                      strokeWidth: 1,
+                    ),
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: colorScheme.onSurface.withOpacity(0.1),
                       strokeWidth: 1,
                     ),
                   ),
@@ -296,22 +273,16 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
     List<FlSpot> spots,
     List<PeriodDay> cycleLogs,
     ColorScheme colorScheme,
+    DateTime start,
   ) {
     if (spots.isEmpty) return [];
 
-    // Map jour -> température
     final tempByDay = {for (final s in spots) s.x.toInt(): s.y};
+    final minDay = tempByDay.keys.reduce((a, b) => a < b ? a : b);
+    final maxDay = tempByDay.keys.reduce((a, b) => a > b ? a : b);
 
-    final int minDay = spots
-        .map((s) => s.x.toInt())
-        .reduce((a, b) => a < b ? a : b);
-    final int maxDay = spots
-        .map((s) => s.x.toInt())
-        .reduce((a, b) => a > b ? a : b);
-
-    // Détermine si chaque jour a du flux
     bool isFlowDay(int d) {
-      final dayDate = cycleLogs.first.date.add(Duration(days: d - 1));
+      final dayDate = start.add(Duration(days: d - 1));
       return cycleLogs.any(
         (log) =>
             log.date.year == dayDate.year &&
@@ -323,41 +294,26 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
 
     final List<LineChartBarData> segments = [];
     List<FlSpot> currentSegment = [];
-    bool currentIsFlow = false;
+    bool currentIsFlow = isFlowDay(minDay);
 
     FlSpot? lastSpot;
-
     for (int d = minDay; d <= maxDay; d++) {
-      // Si pas de température ce jour, on interpole rien, mais on continue la ligne.
       if (!tempByDay.containsKey(d)) continue;
-
-      final temp = tempByDay[d]!;
-      final spot = FlSpot(d.toDouble(), temp);
-      final bool dayFlow = isFlowDay(d);
+      final spot = FlSpot(d.toDouble(), tempByDay[d]!);
+      final dayFlow = isFlowDay(d);
 
       if (lastSpot == null) {
-        // Premier point
         currentSegment = [spot];
         currentIsFlow = dayFlow;
       } else {
-        // Changement de type (flux/non flux)
         if (dayFlow != currentIsFlow) {
-          // On ferme le segment précédent avec une ligne bleue vers le nouveau point
           segments.add(
             _createSegment(currentSegment, currentIsFlow, colorScheme),
           );
-
-          // Important : relier le dernier point du segment précédent
-          // au nouveau point avec une ligne bleue (non flux)
+          // relier en bleu entre segments
           segments.add(
-            _createSegment(
-              [currentSegment.last, spot],
-              false, // bleu
-              colorScheme,
-            ),
+            _createSegment([currentSegment.last, spot], false, colorScheme),
           );
-
-          // Nouveau segment à partir du point actuel
           currentSegment = [spot];
           currentIsFlow = dayFlow;
         } else {
@@ -368,7 +324,6 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
       lastSpot = spot;
     }
 
-    // Ajout du dernier segment
     if (currentSegment.isNotEmpty) {
       segments.add(_createSegment(currentSegment, currentIsFlow, colorScheme));
     }
@@ -383,7 +338,7 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
   ) {
     return LineChartBarData(
       spots: segSpots,
-      isCurved: false, // ligne droite entre les points (résultat demandé)
+      isCurved: false,
       barWidth: 3,
       color: isFlowSegment ? Colors.pink : colorScheme.primary,
       isStrokeCapRound: true,
