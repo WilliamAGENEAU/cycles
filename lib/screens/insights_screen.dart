@@ -3,7 +3,7 @@ import 'package:cycles/l10n/app_localizations.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
 import 'package:cycles/models/periods/period.dart';
 import 'package:cycles/widgets/insights/cycle_length_variance.dart';
-import 'package:cycles/widgets/insights/pain_intensity.dart';
+import 'package:cycles/widgets/insights/emotion_intensity.dart';
 import 'package:cycles/widgets/insights/symptom_frequency.dart';
 import 'package:cycles/widgets/insights/temperature_chart.dart';
 import 'package:flutter/material.dart';
@@ -57,13 +57,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              TemperatureChartWidget(logs: allLogs),
+              TemperatureCycleChart(logs: allLogs),
 
               SymptomFrequencyWidget(logs: allLogs),
 
               CycleLengthVarianceWidget(periods: allPeriods),
 
-              HumeurBreakdownWidget(logs: allLogs),
+              EmotionBreakdownWidget(logs: allLogs),
             ],
           );
         }

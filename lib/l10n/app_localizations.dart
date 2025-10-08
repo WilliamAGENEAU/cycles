@@ -1105,7 +1105,7 @@ abstract class AppLocalizations {
   /// No description provided for @temperatureChart_description.
   ///
   /// In fr, this message translates to:
-  /// **'Évolution de la température au cours du mois'**
+  /// **'Évolution température/cycle'**
   String get temperatureChart_description;
 }
 

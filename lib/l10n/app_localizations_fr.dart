@@ -609,6 +609,5 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noDataAvailable => 'Aucune donnée disponible';
 
   @override
-  String get temperatureChart_description =>
-      'Évolution de la température au cours du mois';
+  String get temperatureChart_description => 'Évolution température/cycle';
 }

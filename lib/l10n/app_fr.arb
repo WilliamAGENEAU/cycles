@@ -259,7 +259,7 @@
     },
     "temperature": "Température (°C)",
     "noDataAvailable": "Aucune donnée disponible",
-    "temperatureChart_description": "Évolution de la température au cours du mois"
+    "temperatureChart_description": "Évolution température/cycle"
 
 
 
