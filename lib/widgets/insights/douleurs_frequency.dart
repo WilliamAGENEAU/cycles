@@ -4,9 +4,9 @@ import 'package:cycles/models/period_logs/symptom_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 
-class SymptomFrequencyWidget extends StatelessWidget {
+class DouleursFrequencyWidget extends StatelessWidget {
   final List<PeriodDay> logs;
-  const SymptomFrequencyWidget({super.key, required this.logs});
+  const DouleursFrequencyWidget({super.key, required this.logs});
 
   @override
   Widget build(BuildContext context) {

@@ -280,16 +280,16 @@ abstract class AppLocalizations {
   /// **'Maux de tête'**
   String get symptom_headache;
 
-  /// No description provided for @symptom_fatigue.
+  /// No description provided for @symptom_dos.
   ///
   /// In fr, this message translates to:
-  /// **'Fatigue'**
-  String get symptom_fatigue;
+  /// **'Mal de dos'**
+  String get symptom_dos;
 
   /// No description provided for @symptom_cramps.
   ///
   /// In fr, this message translates to:
-  /// **'Crampes'**
+  /// **'Crampes ovaires'**
   String get symptom_cramps;
 
   /// No description provided for @symptom_nausea.
@@ -298,23 +298,53 @@ abstract class AppLocalizations {
   /// **'Nausées'**
   String get symptom_nausea;
 
-  /// No description provided for @symptom_moodSwings.
+  /// No description provided for @symptom_reins.
   ///
   /// In fr, this message translates to:
-  /// **'Sautes d’humeur'**
-  String get symptom_moodSwings;
+  /// **'Mal aux reins'**
+  String get symptom_reins;
 
-  /// No description provided for @symptom_bloating.
+  /// No description provided for @symptom_poitrine.
   ///
   /// In fr, this message translates to:
-  /// **'Ballonnements'**
-  String get symptom_bloating;
+  /// **'Poitrine'**
+  String get symptom_poitrine;
 
   /// No description provided for @symptom_acne.
   ///
   /// In fr, this message translates to:
   /// **'Acné'**
   String get symptom_acne;
+
+  /// No description provided for @symptom_brulure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brûlure bas ventre'**
+  String get symptom_brulure;
+
+  /// No description provided for @symptom_ballonement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ballonnements'**
+  String get symptom_ballonement;
+
+  /// No description provided for @symptom_diarrhea.
+  ///
+  /// In fr, this message translates to:
+  /// **'Diarrhée'**
+  String get symptom_diarrhea;
+
+  /// No description provided for @symptom_constipation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Constipation'**
+  String get symptom_constipation;
+
+  /// No description provided for @symptom_vulvar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vulvaire'**
+  String get symptom_vulvar;
 
   /// No description provided for @painLevel_title.
   ///

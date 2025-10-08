@@ -51,12 +51,19 @@
     "flowIntensity_heavy": "Très abondants",
 
     "symptom_headache": "Maux de tête",
-    "symptom_fatigue": "Fatigue",
-    "symptom_cramps": "Crampes",
+    "symptom_dos": "Mal de dos",
+    "symptom_cramps": "Crampes ovaires",
     "symptom_nausea": "Nausées",
-    "symptom_moodSwings": "Sautes d’humeur",
-    "symptom_bloating": "Ballonnements",
+    "symptom_reins": "Mal aux reins",
+    "symptom_poitrine": "Poitrine",
     "symptom_acne": "Acné",
+    "symptom_brulure": "Brûlure bas ventre",
+    "symptom_ballonement": "Ballonnements",
+    "symptom_diarrhea": "Diarrhée",
+    "symptom_constipation": "Constipation", 
+    "symptom_vulvar": "Vulvaire",
+
+
 
     "painLevel_title": "Émotions",
     "emotion_aucun": "Aucune",
