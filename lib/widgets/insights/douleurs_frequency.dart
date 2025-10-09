@@ -27,17 +27,12 @@ class _DouleursFrequencyWidgetState extends State<DouleursFrequencyWidget> {
   @override
   void initState() {
     super.initState();
+
     // Trie les cycles du plus récent au plus ancien
     widget.periods.sort((a, b) => b.startDate.compareTo(a.startDate));
 
-    // Sélectionne le cycle actuel par défaut
-    final now = DateTime.now();
-    final current = widget.periods.indexWhere(
-      (p) =>
-          now.isAfter(p.startDate) &&
-          now.isBefore(p.endDate.add(const Duration(days: 1))),
-    );
-    _currentCycleIndex = current != -1 ? current : 0;
+    // Le plus récent (cycle en cours) est affiché en premier
+    _currentCycleIndex = 0;
   }
 
   void _goToPreviousCycle() {
@@ -65,26 +60,26 @@ class _DouleursFrequencyWidgetState extends State<DouleursFrequencyWidget> {
       return _buildEmptyCard(l10n);
     }
 
+    // Tri final du plus récent au plus ancien
     final sortedPeriods = [...widget.periods]
-      ..sort((a, b) => a.startDate.compareTo(b.startDate));
+      ..sort((a, b) => b.startDate.compareTo(a.startDate));
 
     final currentCycle = sortedPeriods[_currentCycleIndex];
 
-    // Détermination de la fin réelle du cycle
     DateTime cycleStart = currentCycle.startDate;
     DateTime cycleEnd;
 
-    if (_currentCycleIndex < sortedPeriods.length - 1) {
-      // Fin = veille du cycle suivant
-      cycleEnd = sortedPeriods[_currentCycleIndex + 1].startDate.subtract(
+    // Si c’est le cycle le plus récent → on affiche jusqu’à aujourd’hui
+    if (_currentCycleIndex == 0) {
+      cycleEnd = DateTime.now();
+    } else {
+      // Sinon → fin = veille du cycle plus récent (celui affiché avant)
+      cycleEnd = sortedPeriods[_currentCycleIndex - 1].startDate.subtract(
         const Duration(days: 1),
       );
-    } else {
-      // Cycle actuel → jusqu’à aujourd’hui
-      cycleEnd = DateTime.now();
     }
 
-    // On filtre les logs du cycle complet
+    // Filtrer les logs appartenant à ce cycle
     final cycleLogs = widget.logs
         .where(
           (log) =>

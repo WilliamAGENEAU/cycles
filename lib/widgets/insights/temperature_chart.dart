@@ -122,10 +122,10 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
 
     final double minY = (temps.isNotEmpty
         ? temps.reduce((a, b) => a < b ? a : b) - 0.3
-        : 35);
+        : 33);
     final double maxY = (temps.isNotEmpty
         ? temps.reduce((a, b) => a > b ? a : b) + 0.3
-        : 38);
+        : 39);
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
