@@ -128,143 +128,136 @@ class _TemperatureCycleChartState extends State<TemperatureCycleChart> {
         : 38);
 
     return Card(
-      margin: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // --- HEADER ---
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  onPressed: _previousCycle,
-                ),
-                Flexible(
-                  child: Text(
-                    'Cycle du ${DateFormat("d/MM").format(start)} au ${DateFormat("d/MM").format(end)}',
-                    textAlign: TextAlign.center,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  onPressed: _nextCycle,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Évolution de la température au cours du cycle",
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+      child: Column(
+        children: [
+          // --- HEADER ---
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: _previousCycle,
               ),
-            ),
-            const SizedBox(height: 16),
-
-            // --- LINE CHART ---
-            SizedBox(
-              height: 420,
-              child: LineChart(
-                LineChartData(
-                  minX: 1,
-                  maxX: cycleLength.toDouble(),
-                  minY: minY,
-                  maxY: maxY,
-                  lineBarsData: _buildColoredLineSegments(
-                    spots,
-                    cycleLogs,
-                    colorScheme,
-                    start,
+              Flexible(
+                child: Text(
+                  'Cycle du ${DateFormat("d/MM").format(start)} au ${DateFormat("d/MM").format(end)}',
+                  textAlign: TextAlign.center,
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 50,
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        interval: 2,
-                        getTitlesWidget: (value, meta) {
-                          final day = value.toInt();
-                          if (day < 1 || day > cycleLength) {
-                            return const SizedBox.shrink();
-                          }
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: _nextCycle,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Évolution de la température au cours du cycle",
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
 
-                          final date = start.add(Duration(days: day - 1));
-                          final isFlowDay = cycleLogs.any(
-                            (log) =>
-                                log.date.year == date.year &&
-                                log.date.month == date.month &&
-                                log.date.day == date.day &&
-                                log.flow != FlowRate.none,
-                          );
+          // --- LINE CHART ---
+          SizedBox(
+            height: 420,
+            child: LineChart(
+              LineChartData(
+                minX: 1,
+                maxX: cycleLength.toDouble(),
+                minY: minY,
+                maxY: maxY,
+                lineBarsData: _buildColoredLineSegments(
+                  spots,
+                  cycleLogs,
+                  colorScheme,
+                  start,
+                ),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: true, reservedSize: 50),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: 2,
+                      getTitlesWidget: (value, meta) {
+                        final day = value.toInt();
+                        if (day < 1 || day > cycleLength) {
+                          return const SizedBox.shrink();
+                        }
 
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '$day',
+                        final date = start.add(Duration(days: day - 1));
+                        final isFlowDay = cycleLogs.any(
+                          (log) =>
+                              log.date.year == date.year &&
+                              log.date.month == date.month &&
+                              log.date.day == date.day &&
+                              log.flow != FlowRate.none,
+                        );
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '$day',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: isFlowDay
+                                    ? Colors.pink
+                                    : colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Transform.rotate(
+                              angle: -math.pi / 3,
+                              alignment: Alignment.center,
+                              child: Text(
+                                DateFormat('d/MM').format(date),
                                 style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: isFlowDay
-                                      ? Colors.pink
-                                      : colorScheme.onSurface,
+                                  fontSize: 10,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Transform.rotate(
-                                angle: -math.pi / 3,
-                                alignment: Alignment.center,
-                                child: Text(
-                                  DateFormat('d/MM').format(date),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: true,
-                    horizontalInterval: 0.2,
-                    getDrawingVerticalLine: (value) => FlLine(
-                      color: colorScheme.onSurface.withOpacity(0.05),
-                      strokeWidth: 1,
-                    ),
-                    getDrawingHorizontalLine: (value) => FlLine(
-                      color: colorScheme.onSurface.withOpacity(0.1),
-                      strokeWidth: 1,
-                    ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
                   ),
-                  borderData: FlBorderData(show: false),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: true,
+                  horizontalInterval: 0.2,
+                  getDrawingVerticalLine: (value) => FlLine(
+                    color: colorScheme.onSurface.withOpacity(0.05),
+                    strokeWidth: 1,
+                  ),
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: colorScheme.onSurface.withOpacity(0.1),
+                    strokeWidth: 1,
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

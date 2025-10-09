@@ -59,7 +59,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
             children: [
               TemperatureCycleChart(logs: allLogs, periods: allPeriods),
 
-              DouleursFrequencyWidget(logs: allLogs),
+              DouleursFrequencyWidget(logs: allLogs, periods: allPeriods),
 
               CycleLengthVarianceWidget(periods: allPeriods),
 

@@ -266,7 +266,11 @@
     },
     "temperature": "Température (°C)",
     "noDataAvailable": "Aucune donnée disponible",
-    "temperatureChart_description": "Évolution température/cycle"
+    "temperatureChart_description": "Évolution température/cycle",
+    "periodPredictionCircle_daysLeft": "{count, plural, one {Dernier jour des règles dans # jour} other {Règles dans # jours}}",
+    "periodPredictionCircle_lastDay": "Dernier jour des règles",
+    "periodPredictionCircle_nextPeriodIn": "Prochaines règles dans {count, plural, one {# jour} other {# jours}}"
+
 
 
 

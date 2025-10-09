@@ -625,4 +625,29 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get temperatureChart_description => 'Évolution température/cycle';
+
+  @override
+  String periodPredictionCircle_daysLeft(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Règles dans # jours',
+      one: 'Dernier jour des règles dans # jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get periodPredictionCircle_lastDay => 'Dernier jour des règles';
+
+  @override
+  String periodPredictionCircle_nextPeriodIn(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# jours',
+      one: '# jour',
+    );
+    return 'Prochaines règles dans $_temp0';
+  }
 }

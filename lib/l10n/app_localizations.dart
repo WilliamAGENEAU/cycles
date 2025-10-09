@@ -1137,6 +1137,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Évolution température/cycle'**
   String get temperatureChart_description;
+
+  /// No description provided for @periodPredictionCircle_daysLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one {Dernier jour des règles dans # jour} other {Règles dans # jours}}'**
+  String periodPredictionCircle_daysLeft(num count);
+
+  /// No description provided for @periodPredictionCircle_lastDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier jour des règles'**
+  String get periodPredictionCircle_lastDay;
+
+  /// No description provided for @periodPredictionCircle_nextPeriodIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochaines règles dans {count, plural, one {# jour} other {# jours}}'**
+  String periodPredictionCircle_nextPeriodIn(num count);
 }
 
 class _AppLocalizationsDelegate
