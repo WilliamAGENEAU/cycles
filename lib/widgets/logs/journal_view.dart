@@ -70,11 +70,10 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         !d.isAfter(DateUtils.dateOnly(endDate));
   }
 
-  bool _isLoggedSymptomDay(DateTime day) {
+  /// 🔹 Nouveau : jour avec température saisie
+  bool _isTemperatureDay(DateTime day) {
     final log = _logMap[DateUtils.dateOnly(day)];
-    return log != null &&
-        log.flow == FlowRate.none &&
-        (log.symptoms?.isNotEmpty ?? false);
+    return log != null && log.temperature != null;
   }
 
   @override
@@ -95,7 +94,7 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         .reduce((a, b) => a.date.isBefore(b.date) ? a : b)
         .date;
 
-    // 🔹 On autorise l'affichage jusqu’à la fin de la période prédite
+    // 🔹 On autorise l’affichage jusqu’à la fin de la période prédite
     final predictedEnd = widget.predictionResult?.estimatedEndDate;
     final lastVisibleDate =
         predictedEnd != null && predictedEnd.isAfter(DateTime.now())
@@ -107,7 +106,7 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         locale: 'fr_FR',
         startingDayOfWeek: StartingDayOfWeek.monday,
         firstDay: earliestLogDate.subtract(const Duration(days: 365)),
-        lastDay: lastVisibleDate, // ✅ futur visible
+        lastDay: lastVisibleDate,
         focusedDay: _focusedDay,
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
@@ -146,7 +145,6 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         ),
         selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
         onDaySelected: (selectedDay, focusedDay) {
-          // ⛔ Bloque uniquement la saisie dans le futur
           if (selectedDay.isAfter(DateTime.now())) return;
           setState(() {
             _selectedDay = selectedDay;
@@ -164,7 +162,7 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
           defaultBuilder: (context, day, focusedDay) {
             final isPeriod = _isPeriodDay(day);
             final isPredicted = _isPredictedDay(day);
-            final isLoggedSymptom = _isLoggedSymptomDay(day);
+            final isTemperature = _isTemperatureDay(day);
             final today = DateUtils.isSameDay(day, DateTime.now());
 
             // --- JOUR DE RÈGLE ---
@@ -205,8 +203,8 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
               );
             }
 
-            // --- JOUR AVEC SYMPTÔME (petit point) ---
-            if (isLoggedSymptom) {
+            // --- JOUR AVEC TEMPÉRATURE ---
+            if (isTemperature) {
               return Stack(
                 alignment: Alignment.center,
                 children: [

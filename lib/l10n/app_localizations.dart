@@ -895,7 +895,7 @@ abstract class AppLocalizations {
   /// No description provided for @cycleLengthVarianceWidget_cycleAndPeriodVeriance.
   ///
   /// In fr, this message translates to:
-  /// **'Variance du cycle et de la période'**
+  /// **'Analyses des cycles'**
   String get cycleLengthVarianceWidget_cycleAndPeriodVeriance;
 
   /// No description provided for @cycleLengthVarianceWidget_averageCycle.
@@ -1155,6 +1155,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Prochaines règles dans {count, plural, one {# jour} other {# jours}}'**
   String periodPredictionCircle_nextPeriodIn(num count);
+
+  /// No description provided for @daysPerCycle.
+  ///
+  /// In fr, this message translates to:
+  /// **'j / cycle'**
+  String get daysPerCycle;
+
+  /// No description provided for @cycleLengthVarianceWidget_periodVariance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Variance des règles'**
+  String get cycleLengthVarianceWidget_periodVariance;
+
+  /// No description provided for @cycleLengthVarianceWidget_cycleVariance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Variance des cycles'**
+  String get cycleLengthVarianceWidget_cycleVariance;
 }
 
 class _AppLocalizationsDelegate

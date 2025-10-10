@@ -474,7 +474,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cycleLengthVarianceWidget_cycleAndPeriodVeriance =>
-      'Variance du cycle et de la période';
+      'Analyses des cycles';
 
   @override
   String get cycleLengthVarianceWidget_averageCycle => 'Cycle moyen';
@@ -650,4 +650,13 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return 'Prochaines règles dans $_temp0';
   }
+
+  @override
+  String get daysPerCycle => 'j / cycle';
+
+  @override
+  String get cycleLengthVarianceWidget_periodVariance => 'Variance des règles';
+
+  @override
+  String get cycleLengthVarianceWidget_cycleVariance => 'Variance des cycles';
 }

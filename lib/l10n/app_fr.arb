@@ -196,7 +196,7 @@
         }
     },
     "cycleLengthVarianceWidget_LogAtLeastTwoPeriods": "Au moins deux cycles sont nécessaires pour afficher la variance.",
-    "cycleLengthVarianceWidget_cycleAndPeriodVeriance": "Variance du cycle et de la période",
+    "cycleLengthVarianceWidget_cycleAndPeriodVeriance": "Analyses des cycles",
     "cycleLengthVarianceWidget_averageCycle": "Cycle moyen",
     "cycleLengthVarianceWidget_averagePeriod": "Période moyenne",
     "cycleLengthVarianceWidget_period": "Période",
@@ -269,7 +269,10 @@
     "temperatureChart_description": "Évolution température/cycle",
     "periodPredictionCircle_daysLeft": "{count, plural, one {Dernier jour des règles dans # jour} other {Règles dans # jours}}",
     "periodPredictionCircle_lastDay": "Dernier jour des règles",
-    "periodPredictionCircle_nextPeriodIn": "Prochaines règles dans {count, plural, one {# jour} other {# jours}}"
+    "periodPredictionCircle_nextPeriodIn": "Prochaines règles dans {count, plural, one {# jour} other {# jours}}",
+    "daysPerCycle": "j / cycle",
+    "cycleLengthVarianceWidget_periodVariance": "Variance des règles",
+    "cycleLengthVarianceWidget_cycleVariance" : "Variance des cycles"
 
 
 
