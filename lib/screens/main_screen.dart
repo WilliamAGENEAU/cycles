@@ -108,9 +108,9 @@ class _MainScreenState extends State<MainScreen> {
     return FloatingActionButton(
       key: const ValueKey('countdown_reminder_fab'),
       tooltip: l10n.mainScreen_tooltipCancelReminder,
-      onPressed: () =>
-          _logsScreenKey.currentState?.handleTamponReminderCountdown(),
-      child: const Icon(Icons.timer),
+      onPressed: () => "",
+      // _logsScreenKey.currentState?.handleTamponReminderCountdown(),
+      // child: const Icon(Icons.timer),
     );
   }
 

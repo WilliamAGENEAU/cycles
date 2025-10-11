@@ -480,7 +480,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cycleLengthVarianceWidget_averageCycle => 'Cycle moyen';
 
   @override
-  String get cycleLengthVarianceWidget_averagePeriod => 'Période moyenne';
+  String get cycleLengthVarianceWidget_averagePeriod => 'Règles moyen';
 
   @override
   String get cycleLengthVarianceWidget_period => 'Période';

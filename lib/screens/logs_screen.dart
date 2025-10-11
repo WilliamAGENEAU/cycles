@@ -1,3 +1,4 @@
+// lib/screens/logs_screen.dart
 import 'package:cycles/database/repositories/periods_repository.dart';
 import 'package:cycles/l10n/app_localizations.dart';
 import 'package:cycles/models/period_logs/period_day.dart';
@@ -35,8 +36,16 @@ class LogsScreenState extends State<LogsScreen> {
   bool _isLoading = true;
   PeriodPredictionResult? _predictionResult;
   PeriodHistoryView _selectedView = PeriodHistoryView.journal;
-  int _circleCurrentValue = 0;
-  int _circleMaxValue = 28;
+
+  // UI values for the circle
+  int _dayInCycle = 1;
+  double _periodFraction = 5 / 28;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshPeriodLogs();
+  }
 
   Future<void> handleTamponReminderCountdown() async {
     final dueDate = await NotificationService.getTamponReminderScheduledTime();
@@ -124,39 +133,93 @@ class LogsScreenState extends State<LogsScreen> {
     }
   }
 
-  void _showDetailsBottomSheet(PeriodDay log) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return PeriodDetailsBottomSheet(
-          log: log,
-          onDelete: () => _deleteExistingLog(log.id),
-          onSave: _updateExistingLog,
-        );
-      },
+  Future<void> createNewLog(DateTime selectedDate) async {
+    final bool wasLogSuccessful = await PeriodLoggerService.showAndLogPeriod(
+      context,
+      selectedDate,
     );
+
+    if (wasLogSuccessful && mounted) {
+      _refreshPeriodLogs();
+    }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  Future<void> _updateExistingLog(PeriodDay updatedLog) async {
+    await periodsRepo.updatePeriodLog(updatedLog);
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+    _refreshPeriodLogs();
+  }
+
+  Future<void> _deleteExistingLog(int? id) async {
+    if (id == null) return;
+    await periodsRepo.deletePeriodLog(id);
     _refreshPeriodLogs();
   }
 
   Future<void> _refreshPeriodLogs() async {
+    setState(() => _isLoading = true);
+
     final periodDays = await periodsRepo.readAllPeriodLogs();
     final periods = await periodsRepo.readAllPeriods();
-    final isReminderSet = await NotificationService.isTamponReminderScheduled();
     final predictionResult = PeriodPredictor.estimateNextPeriod(
       periods,
       DateTime.now(),
     );
     final selectedView = await _settingsService.getHistoryView();
 
+    // keep defaults
+    int dayInCycle = 1;
+    int cycleLength = predictionResult?.averageCycleLength ?? 28;
+    int periodDaysCount = predictionResult?.averagePeriodDuration ?? 5;
+    double periodFraction = (periodDaysCount / cycleLength);
+
+    if (periods.isNotEmpty) {
+      // select the most recent period by startDate
+      final sorted = [...periods]
+        ..sort((a, b) => b.startDate.compareTo(a.startDate)); // newest first
+      final currentPeriod = sorted.first;
+      // if we have a previous period, compute cycle length as days between starts
+      if (sorted.length > 1) {
+        final previous = sorted[1];
+        final diff = currentPeriod.startDate
+            .difference(previous.startDate)
+            .inDays;
+        if (diff > 0) {
+          cycleLength = diff;
+        } else {
+          cycleLength = predictionResult?.averageCycleLength ?? 28;
+        }
+      } else {
+        cycleLength = predictionResult?.averageCycleLength ?? 28;
+      }
+
+      // day in cycle = days since currentPeriod.startDate (inclusive)
+      final now = DateTime.now();
+      var computedDay = now.difference(currentPeriod.startDate).inDays + 1;
+      if (computedDay < 1) computedDay = 1;
+      // don't let day exceed cycleLength (keeps UI sensible)
+      if (computedDay > cycleLength) computedDay = cycleLength;
+
+      dayInCycle = computedDay;
+
+      // Period length: use actual period length if available (totalDays),
+      // otherwise fallback to predicted average.
+      if ((currentPeriod.totalDays) > 0) {
+        periodDaysCount = currentPeriod.totalDays;
+      } else {
+        periodDaysCount =
+            predictionResult?.averagePeriodDuration ?? periodDaysCount;
+      }
+
+      // compute fraction for arc
+      periodFraction = periodDaysCount / cycleLength;
+      if (periodFraction < 0) periodFraction = 0;
+      if (periodFraction > 1) periodFraction = 1;
+    }
+
+    // schedule notifications if predictionResult available (kept logic)
     if (predictionResult != null) {
       final settingsService = SettingsService();
       final periodNotificationsEnabled = await settingsService
@@ -175,8 +238,6 @@ class LogsScreenState extends State<LogsScreen> {
 
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-
-        // Period due notification
         try {
           await NotificationService.schedulePeriodNotifications(
             scheduledTime: predictionResult.estimatedStartDate,
@@ -191,7 +252,6 @@ class LogsScreenState extends State<LogsScreen> {
           debugPrint('Error creating period notification: $e');
         }
 
-        // Overdue period notification
         try {
           await NotificationService.schedulePeriodNotifications(
             scheduledTime: predictionResult.estimatedStartDate,
@@ -210,62 +270,15 @@ class LogsScreenState extends State<LogsScreen> {
       }
     }
 
-    final isPeriodOngoing =
-        periods.isNotEmpty &&
-        DateUtils.isSameDay(periods.first.endDate, DateTime.now());
-    FabState currentState;
-    if (!isPeriodOngoing) {
-      currentState = FabState.logPeriod;
-    } else {
-      currentState = isReminderSet
-          ? FabState.cancelReminder
-          : FabState.setReminder;
-    }
-    widget.onFabStateChange(currentState);
-
-    int daysUntilDueForCircle = predictionResult?.daysUntilDue ?? 0;
-    int circleMaxValue = predictionResult?.averageCycleLength ?? 28;
-    int circleCurrentValue = daysUntilDueForCircle.clamp(0, circleMaxValue);
-
     setState(() {
-      _isLoading = false;
       _periodLogEntries = periodDays;
       _periodEntries = periods;
       _predictionResult = predictionResult;
       _selectedView = selectedView;
-      _circleCurrentValue = circleCurrentValue;
-      _circleMaxValue = circleMaxValue;
+      _dayInCycle = dayInCycle;
+      _periodFraction = periodFraction;
+      _isLoading = false;
     });
-  }
-
-  /// Creates a new log entry.
-  Future<void> createNewLog(DateTime selectedDate) async {
-    final bool wasLogSuccessful = await PeriodLoggerService.showAndLogPeriod(
-      context,
-      selectedDate,
-    );
-
-    if (wasLogSuccessful && mounted) {
-      _refreshPeriodLogs();
-    }
-  }
-
-  /// updates an existing log entry.
-  Future<void> _updateExistingLog(PeriodDay updatedLog) async {
-    await periodsRepo.updatePeriodLog(updatedLog);
-
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-
-    _refreshPeriodLogs();
-  }
-
-  /// Deletes a log entry.
-  Future<void> _deleteExistingLog(int? id) async {
-    if (id == null) return;
-    await periodsRepo.deletePeriodLog(id);
-    _refreshPeriodLogs();
   }
 
   @override
@@ -286,26 +299,51 @@ class LogsScreenState extends State<LogsScreen> {
       } else if (_predictionResult!.daysUntilDue == 0) {
         predictionText = '${l10n.logScreen_periodDueToday} $datePart';
       } else {
-        // _predictionResult.daysUntilDue is negative, meaning overdue
         predictionText =
             '${l10n.logScreen_periodOverdueBy(-_predictionResult!.daysUntilDue)}: $datePart';
       }
     }
+
     return Column(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 100),
-        BasicProgressCircle(
-          currentValue: _circleCurrentValue,
-          maxValue: _circleMaxValue,
-          circleSize: 220,
-          strokeWidth: 20,
-          progressColor: const Color.fromARGB(255, 255, 118, 118),
-          trackColor: const Color.fromARGB(20, 255, 118, 118),
+        // Circle + center text
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            BasicProgressCircle(
+              periodFraction: _periodFraction,
+              circleSize: 220,
+              strokeWidth: 20,
+              progressColor: const Color.fromARGB(255, 255, 118, 118),
+              trackColor: const Color.fromARGB(20, 255, 118, 118),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Jour',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '$_dayInCycle',
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 12),
         Text(
           predictionText,
           textAlign: TextAlign.center,
@@ -316,16 +354,37 @@ class LogsScreenState extends State<LogsScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        DynamicHistoryView(
-          predictionResult: _predictionResult,
-          selectedView: _selectedView,
-          periodLogEntries: _periodLogEntries,
-          periodEntries: _periodEntries,
-          isLoading: _isLoading,
-          onLogRequested: createNewLog,
-          onLogTapped: _showDetailsBottomSheet,
+        Expanded(
+          child: DynamicHistoryView(
+            predictionResult: _predictionResult,
+            selectedView: _selectedView,
+            periodLogEntries: _periodLogEntries,
+            periodEntries: _periodEntries,
+            isLoading: _isLoading,
+            onLogRequested: (d) => createNewLog(d),
+            onLogTapped: (log) {
+              _showDetailsBottomSheet(log);
+            },
+          ),
         ),
       ],
+    );
+  }
+
+  void _showDetailsBottomSheet(PeriodDay log) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return PeriodDetailsBottomSheet(
+          log: log,
+          onDelete: () => _deleteExistingLog(log.id),
+          onSave: _updateExistingLog,
+        );
+      },
     );
   }
 }

@@ -174,19 +174,20 @@ class _CycleLengthVarianceWidgetState extends State<CycleLengthVarianceWidget>
         avgPeriod > 0 ? l10n.dayCount(avgPeriod.round()) : "No data",
         colorScheme.primary,
       ),
-      buildAnimatedSubCard(
-        2,
-        l10n.cycleLengthVarianceWidget_periodVariance,
-        variancePeriod != null
-            ? "${variancePeriod.toStringAsFixed(1)} j"
-            : "No data",
-        colorScheme.primary,
-      ),
+
       buildAnimatedSubCard(
         3,
         l10n.cycleLengthVarianceWidget_cycleVariance,
         varianceCycle != null
             ? "${varianceCycle.toStringAsFixed(1)} j"
+            : "No data",
+        colorScheme.primary,
+      ),
+      buildAnimatedSubCard(
+        2,
+        l10n.cycleLengthVarianceWidget_periodVariance,
+        variancePeriod != null
+            ? "${variancePeriod.toStringAsFixed(1)} j"
             : "No data",
         colorScheme.primary,
       ),

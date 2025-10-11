@@ -1,125 +1,93 @@
-// ignore_for_file: deprecated_member_use
-
-import 'package:cycles/l10n/app_localizations.dart';
+// lib/widgets/basic_progress_circle.dart
 import 'package:flutter/material.dart';
+import 'dart:math';
 
-class BasicProgressCircle extends StatefulWidget {
-  final int currentValue;
-  final int maxValue;
+class BasicProgressCircle extends StatelessWidget {
+  /// portion de l'arc rouge : periodDays / cycleLength (0.0 .. 1.0)
+  final double periodFraction;
   final double circleSize;
   final double strokeWidth;
   final Color progressColor;
   final Color trackColor;
-  final Duration animationDuration;
 
   const BasicProgressCircle({
     super.key,
-    required this.currentValue,
-    required this.maxValue,
-    this.circleSize = 200.0,
-    this.strokeWidth = 15.0,
-    this.progressColor = Colors.red,
-    this.trackColor = Colors.grey,
-    this.animationDuration = const Duration(milliseconds: 700),
+    required this.periodFraction,
+    this.circleSize = 220,
+    this.strokeWidth = 20,
+    this.progressColor = const Color.fromARGB(255, 255, 118, 118),
+    this.trackColor = const Color.fromARGB(20, 255, 118, 118),
   });
 
   @override
-  State<BasicProgressCircle> createState() => _BasicProgressCircleState();
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: circleSize,
+      height: circleSize,
+      child: CustomPaint(
+        painter: _ProgressCirclePainter(
+          periodFraction: periodFraction.clamp(0.0, 1.0),
+          strokeWidth: strokeWidth,
+          progressColor: progressColor,
+          trackColor: trackColor,
+        ),
+      ),
+    );
+  }
 }
 
-class _BasicProgressCircleState extends State<BasicProgressCircle>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+class _ProgressCirclePainter extends CustomPainter {
+  final double periodFraction;
+  final double strokeWidth;
+  final Color progressColor;
+  final Color trackColor;
 
-  double _calculateTargetProgress() {
-    return (1.0 - (widget.currentValue / widget.maxValue)).clamp(0.0, 1.0);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.animationDuration,
-    );
-
-    _animation =
-        Tween<double>(
-          begin: 0.0,
-          end: _calculateTargetProgress(),
-        ).animate(_controller)..addListener(() {
-          setState(() {});
-        });
-
-    _controller.forward();
-  }
+  _ProgressCirclePainter({
+    required this.periodFraction,
+    required this.strokeWidth,
+    required this.progressColor,
+    required this.trackColor,
+  });
 
   @override
-  void didUpdateWidget(covariant BasicProgressCircle oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = (size.width / 2) - (strokeWidth / 2);
 
-    if (widget.currentValue != oldWidget.currentValue ||
-        widget.maxValue != oldWidget.maxValue) {
-      _animation = Tween<double>(
-        begin: _animation.value,
-        end: _calculateTargetProgress(),
-      ).animate(_controller);
-      _controller.forward(from: 0.0);
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final progressPaint = Paint()
+      ..color = progressColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    // draw full track (light)
+    canvas.drawCircle(center, radius, trackPaint);
+
+    // draw red arc for period portion (start at top, clockwise)
+    final startAngle = -pi / 2;
+    final sweep = 2 * pi * periodFraction;
+    if (sweep > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweep,
+        false,
+        progressPaint,
+      );
     }
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-
-    return SizedBox(
-      width: widget.circleSize,
-      height: widget.circleSize,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: widget.circleSize,
-            height: widget.circleSize,
-            child: CircularProgressIndicator(
-              year2023: false,
-              value: _animation.value,
-              strokeWidth: widget.strokeWidth,
-              valueColor: AlwaysStoppedAnimation<Color>(widget.progressColor),
-              backgroundColor: widget.trackColor,
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${widget.currentValue}',
-                style: TextStyle(
-                  fontSize: 70,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
-                ),
-              ),
-              Text(
-                l10n.periodPredictionCircle_days(widget.currentValue),
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  color: colorScheme.secondary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+  bool shouldRepaint(covariant _ProgressCirclePainter oldDelegate) {
+    return oldDelegate.periodFraction != periodFraction ||
+        oldDelegate.progressColor != progressColor ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

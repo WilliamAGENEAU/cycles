@@ -907,7 +907,7 @@ abstract class AppLocalizations {
   /// No description provided for @cycleLengthVarianceWidget_averagePeriod.
   ///
   /// In fr, this message translates to:
-  /// **'Période moyenne'**
+  /// **'Règles moyen'**
   String get cycleLengthVarianceWidget_averagePeriod;
 
   /// No description provided for @cycleLengthVarianceWidget_period.
