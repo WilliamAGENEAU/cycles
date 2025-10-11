@@ -1,93 +1,214 @@
-// lib/widgets/basic_progress_circle.dart
-import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:flutter/material.dart';
 
-class BasicProgressCircle extends StatelessWidget {
-  /// portion de l'arc rouge : periodDays / cycleLength (0.0 .. 1.0)
+class BasicProgressCircle extends StatefulWidget {
   final double periodFraction;
+  final double ovulationStartFraction;
+  final double ovulationFraction;
   final double circleSize;
   final double strokeWidth;
-  final Color progressColor;
-  final Color trackColor;
+  final int dayInCycle;
+  final int cycleLength;
 
   const BasicProgressCircle({
     super.key,
     required this.periodFraction,
-    this.circleSize = 220,
-    this.strokeWidth = 20,
-    this.progressColor = const Color.fromARGB(255, 255, 118, 118),
-    this.trackColor = const Color.fromARGB(20, 255, 118, 118),
+    required this.ovulationStartFraction,
+    required this.ovulationFraction,
+    required this.circleSize,
+    required this.strokeWidth,
+    required this.dayInCycle,
+    required this.cycleLength,
   });
 
   @override
+  State<BasicProgressCircle> createState() => _BasicProgressCircleState();
+}
+
+class _BasicProgressCircleState extends State<BasicProgressCircle>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1800),
+      vsync: this,
+    );
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutCubic,
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: circleSize,
-      height: circleSize,
-      child: CustomPaint(
-        painter: _ProgressCirclePainter(
-          periodFraction: periodFraction.clamp(0.0, 1.0),
-          strokeWidth: strokeWidth,
-          progressColor: progressColor,
-          trackColor: trackColor,
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, _) {
+        final animatedDay = (widget.dayInCycle * _animation.value).clamp(
+          0.0,
+          widget.dayInCycle.toDouble(),
+        );
+        return CustomPaint(
+          size: Size(widget.circleSize, widget.circleSize),
+          painter: _BasicProgressCirclePainter(
+            periodFraction: widget.periodFraction,
+            ovulationStartFraction: widget.ovulationStartFraction,
+            ovulationFraction: widget.ovulationFraction,
+            strokeWidth: widget.strokeWidth,
+            dayInCycle: animatedDay.toInt(),
+            cycleLength: widget.cycleLength,
+          ),
+        );
+      },
     );
   }
 }
 
-class _ProgressCirclePainter extends CustomPainter {
+class _BasicProgressCirclePainter extends CustomPainter {
   final double periodFraction;
+  final double ovulationStartFraction;
+  final double ovulationFraction;
   final double strokeWidth;
-  final Color progressColor;
-  final Color trackColor;
+  final int dayInCycle;
+  final int cycleLength;
 
-  _ProgressCirclePainter({
+  _BasicProgressCirclePainter({
     required this.periodFraction,
+    required this.ovulationStartFraction,
+    required this.ovulationFraction,
     required this.strokeWidth,
-    required this.progressColor,
-    required this.trackColor,
+    required this.dayInCycle,
+    required this.cycleLength,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-    final radius = (size.width / 2) - (strokeWidth / 2);
+    final radius = (size.width - strokeWidth) / 2;
+    const startAngle = -pi / 2;
 
-    final trackPaint = Paint()
-      ..color = trackColor
+    // 🎨 Cercle de fond
+    final paintBase = Paint()
+      ..color = const Color.fromARGB(20, 255, 118, 118)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, paintBase);
 
-    final progressPaint = Paint()
-      ..color = progressColor
+    // 🔴 Période (règles)
+    final paintPeriod = Paint()
+      ..color = Colors.redAccent
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      2 * pi * periodFraction,
+      false,
+      paintPeriod,
+    );
 
-    // draw full track (light)
-    canvas.drawCircle(center, radius, trackPaint);
+    // 🔵 Fenêtre d’ovulation
+    final paintOvulation = Paint()
+      ..color = const Color(0xFF64B5F6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle + 2 * pi * ovulationStartFraction,
+      2 * pi * ovulationFraction,
+      false,
+      paintOvulation,
+    );
 
-    // draw red arc for period portion (start at top, clockwise)
-    final startAngle = -pi / 2;
-    final sweep = 2 * pi * periodFraction;
-    if (sweep > 0) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        sweep,
-        false,
-        progressPaint,
+    // 🔹 Indicateur du jour actuel
+    if (dayInCycle > 0 && cycleLength > 0) {
+      final fraction = (dayInCycle % cycleLength) / cycleLength;
+      final angle = startAngle + 2 * pi * fraction;
+
+      final indicatorX = center.dx + radius * cos(angle);
+      final indicatorY = center.dy + radius * sin(angle);
+      final indicatorCenter = Offset(indicatorX, indicatorY);
+
+      // Cercle du jour
+      final paintIndicator = Paint()
+        ..color = Colors.blueGrey.shade700
+        ..style = PaintingStyle.fill;
+
+      const double smallCircleSize = 34;
+      canvas.drawCircle(indicatorCenter, smallCircleSize / 2, paintIndicator);
+
+      // Texte du jour
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: '$dayInCycle',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        indicatorCenter - Offset(textPainter.width / 2, textPainter.height / 2),
       );
     }
+
+    // ➡️ Flèche de direction (Icon)
+    final arrowAngle = startAngle + 2 * pi - 0.25; // légèrement avant la fin
+    final arrowOffset = Offset(
+      center.dx + radius * cos(arrowAngle),
+      center.dy + radius * sin(arrowAngle),
+    );
+
+    // on dessine l'icône flèche via TextPainter (utilise un symbole)
+    const icon = Icons.arrow_forward;
+    final iconPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          color: Colors.grey.shade500,
+          fontSize: 18,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    iconPainter.layout();
+
+    canvas.save();
+    canvas.translate(arrowOffset.dx, arrowOffset.dy);
+    canvas.rotate(arrowAngle + pi / 2);
+    canvas.translate(-iconPainter.width / 2, -iconPainter.height / 2);
+    iconPainter.paint(canvas, Offset.zero);
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _ProgressCirclePainter oldDelegate) {
-    return oldDelegate.periodFraction != periodFraction ||
-        oldDelegate.progressColor != progressColor ||
-        oldDelegate.trackColor != trackColor ||
-        oldDelegate.strokeWidth != strokeWidth;
-  }
+  bool shouldRepaint(_BasicProgressCirclePainter oldDelegate) =>
+      oldDelegate.periodFraction != periodFraction ||
+      oldDelegate.ovulationStartFraction != ovulationStartFraction ||
+      oldDelegate.ovulationFraction != ovulationFraction ||
+      oldDelegate.dayInCycle != dayInCycle ||
+      oldDelegate.cycleLength != cycleLength;
 }

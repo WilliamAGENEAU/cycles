@@ -32,6 +32,7 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
   Map<DateTime, PeriodDay> _logMap = {};
+  DateTime? _ovulationDate;
 
   @override
   void initState() {
@@ -53,6 +54,8 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
       for (var log in widget.periodLogEntries)
         DateUtils.dateOnly(log.date): log,
     };
+
+    _detectOvulationDay();
   }
 
   bool _isPeriodDay(DateTime day) {
@@ -70,10 +73,52 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         !d.isAfter(DateUtils.dateOnly(endDate));
   }
 
-  /// 🔹 Nouveau : jour avec température saisie
   bool _isTemperatureDay(DateTime day) {
     final log = _logMap[DateUtils.dateOnly(day)];
     return log != null && log.temperature != null;
+  }
+
+  bool _isOvulationWindow(DateTime day) {
+    if (_ovulationDate == null) return false;
+    final diff = day.difference(_ovulationDate!).inDays;
+    return diff >= 0 && diff < 7;
+  }
+
+  /// 🩵 Détection automatique du jour d’ovulation
+  void _detectOvulationDay() {
+    if (widget.periodLogEntries.isEmpty) return;
+
+    // Trouver le dernier début de règles
+    final sortedLogs = [...widget.periodLogEntries]
+      ..sort((a, b) => a.date.compareTo(b.date));
+    DateTime? currentCycleStart;
+
+    for (int i = sortedLogs.length - 1; i >= 0; i--) {
+      if (sortedLogs[i].flow != FlowRate.none) {
+        currentCycleStart = sortedLogs[i].date;
+        break;
+      }
+    }
+
+    if (currentCycleStart == null) return;
+
+    // Prendre les jours 11 à 15 du cycle
+    final temps = <PeriodDay>[];
+    for (int i = 11; i <= 15; i++) {
+      final day = DateUtils.dateOnly(
+        currentCycleStart.add(Duration(days: i - 1)),
+      );
+      final log = _logMap[day];
+      if (log != null && log.temperature != null) {
+        temps.add(log);
+      }
+    }
+
+    if (temps.isEmpty) return;
+
+    // Température la plus basse
+    temps.sort((a, b) => a.temperature!.compareTo(b.temperature!));
+    _ovulationDate = temps.first.date;
   }
 
   @override
@@ -94,7 +139,6 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         .reduce((a, b) => a.date.isBefore(b.date) ? a : b)
         .date;
 
-    // 🔹 On autorise l’affichage jusqu’à la fin de la période prédite
     final predictedEnd = widget.predictionResult?.estimatedEndDate;
     final lastVisibleDate =
         predictedEnd != null && predictedEnd.isAfter(DateTime.now())
@@ -134,7 +178,7 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
           outsideDaysVisible: false,
           todayDecoration: BoxDecoration(
             border: Border.all(color: Colors.blueAccent, width: 2),
-            borderRadius: BorderRadius.circular(6),
+            shape: BoxShape.rectangle,
           ),
           todayTextStyle: const TextStyle(
             color: Colors.white,
@@ -163,28 +207,90 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
             final isPeriod = _isPeriodDay(day);
             final isPredicted = _isPredictedDay(day);
             final isTemperature = _isTemperatureDay(day);
+            final isOvulationWindow = _isOvulationWindow(day);
             final today = DateUtils.isSameDay(day, DateTime.now());
 
-            // --- JOUR DE RÈGLE ---
+            // 🔴 RÈGLES
             if (isPeriod) {
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+              return Stack(
                 alignment: Alignment.center,
-                child: Text(
-                  '${day.day}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 2,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                  if (isTemperature)
+                    Positioned(
+                      bottom: 10,
+                      child: Container(
+                        width: 5,
+                        height: 5,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF0D47A1), // Bleu foncé
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
               );
             }
 
-            // --- JOUR PRÉDIT ---
+            // 🔵 PÉRIODE D’OVULATION
+            if (isOvulationWindow) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 2,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(
+                        0xFF64B5F6,
+                      ).withOpacity(0.9), // Bleu clair
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (isTemperature)
+                    Positioned(
+                      bottom: 10,
+                      child: Container(
+                        width: 5,
+                        height: 5,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF0D47A1), // Bleu foncé
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            }
+
+            // 🔮 PRÉDICTION
             if (isPredicted) {
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
@@ -203,49 +309,42 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
               );
             }
 
-            // --- JOUR AVEC TEMPÉRATURE ---
-            if (isTemperature) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${day.day}',
-                      style: const TextStyle(color: Colors.white),
+            // ⚪ JOUR NORMAL
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  decoration: today
+                      ? BoxDecoration(
+                          border: Border.all(
+                            color: Colors.blueAccent,
+                            width: 2,
+                          ),
+                          shape: BoxShape.rectangle,
+                        )
+                      : null,
+                  child: Text(
+                    '${day.day}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: today ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
+                ),
+                if (isTemperature)
                   Positioned(
-                    bottom: 6,
+                    bottom: 10,
                     child: Container(
                       width: 5,
                       height: 5,
                       decoration: const BoxDecoration(
-                        color: Colors.blueAccent,
+                        color: Color(0xFF0D47A1), // Bleu foncé
                         shape: BoxShape.circle,
                       ),
                     ),
                   ),
-                ],
-              );
-            }
-
-            // --- JOUR NORMAL OU AUJOURD’HUI ---
-            return Container(
-              alignment: Alignment.center,
-              decoration: today
-                  ? BoxDecoration(
-                      border: Border.all(color: Colors.blueAccent, width: 2),
-                      borderRadius: BorderRadius.circular(6),
-                    )
-                  : null,
-              child: Text(
-                '${day.day}',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: today ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
+              ],
             );
           },
         ),

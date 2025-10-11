@@ -8,7 +8,6 @@ import 'package:cycles/screens/main_screen.dart';
 import 'package:cycles/services/notification_service.dart';
 import 'package:cycles/services/period_logger_service.dart';
 import 'package:cycles/services/settings_service.dart';
-import 'package:cycles/utils/constants.dart';
 import 'package:cycles/utils/period_predictor.dart';
 import 'package:cycles/widgets/basic_progress_circle.dart';
 import 'package:cycles/widgets/dialogs/reminder_countdown_dialog.dart';
@@ -37,9 +36,11 @@ class LogsScreenState extends State<LogsScreen> {
   PeriodPredictionResult? _predictionResult;
   PeriodHistoryView _selectedView = PeriodHistoryView.journal;
 
-  // UI values for the circle
+  // UI values
   int _dayInCycle = 1;
-  double _periodFraction = 5 / 28;
+  double _periodFraction = 0.0;
+  double _ovulationStartFraction = 0.0;
+  int _cycleLength = 28;
 
   @override
   void initState() {
@@ -49,20 +50,7 @@ class LogsScreenState extends State<LogsScreen> {
 
   Future<void> handleTamponReminderCountdown() async {
     final dueDate = await NotificationService.getTamponReminderScheduledTime();
-
-    if (dueDate == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.logScreen_couldNotCancelReminder,
-            ),
-          ),
-        );
-      }
-      return;
-    }
-
+    if (dueDate == null) return;
     if (mounted) {
       showDialog(
         context: context,
@@ -146,9 +134,7 @@ class LogsScreenState extends State<LogsScreen> {
 
   Future<void> _updateExistingLog(PeriodDay updatedLog) async {
     await periodsRepo.updatePeriodLog(updatedLog);
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
+    if (mounted) Navigator.of(context).pop();
     _refreshPeriodLogs();
   }
 
@@ -169,105 +155,32 @@ class LogsScreenState extends State<LogsScreen> {
     );
     final selectedView = await _settingsService.getHistoryView();
 
-    // keep defaults
     int dayInCycle = 1;
     int cycleLength = predictionResult?.averageCycleLength ?? 28;
     int periodDaysCount = predictionResult?.averagePeriodDuration ?? 5;
     double periodFraction = (periodDaysCount / cycleLength);
+    double ovulationStartFraction = 0.0;
 
     if (periods.isNotEmpty) {
-      // select the most recent period by startDate
       final sorted = [...periods]
-        ..sort((a, b) => b.startDate.compareTo(a.startDate)); // newest first
+        ..sort((a, b) => b.startDate.compareTo(a.startDate));
       final currentPeriod = sorted.first;
-      // if we have a previous period, compute cycle length as days between starts
-      if (sorted.length > 1) {
-        final previous = sorted[1];
-        final diff = currentPeriod.startDate
-            .difference(previous.startDate)
-            .inDays;
-        if (diff > 0) {
-          cycleLength = diff;
-        } else {
-          cycleLength = predictionResult?.averageCycleLength ?? 28;
-        }
-      } else {
-        cycleLength = predictionResult?.averageCycleLength ?? 28;
-      }
-
-      // day in cycle = days since currentPeriod.startDate (inclusive)
       final now = DateTime.now();
-      var computedDay = now.difference(currentPeriod.startDate).inDays + 1;
-      if (computedDay < 1) computedDay = 1;
-      // don't let day exceed cycleLength (keeps UI sensible)
-      if (computedDay > cycleLength) computedDay = cycleLength;
 
-      dayInCycle = computedDay;
+      // Calcule le jour actuel dans le cycle
+      final diff = now.difference(currentPeriod.startDate).inDays + 1;
+      dayInCycle = diff.clamp(1, cycleLength);
 
-      // Period length: use actual period length if available (totalDays),
-      // otherwise fallback to predicted average.
-      if ((currentPeriod.totalDays) > 0) {
+      // Calcule la fraction des règles
+      if (currentPeriod.totalDays > 0) {
         periodDaysCount = currentPeriod.totalDays;
-      } else {
-        periodDaysCount =
-            predictionResult?.averagePeriodDuration ?? periodDaysCount;
       }
-
-      // compute fraction for arc
       periodFraction = periodDaysCount / cycleLength;
-      if (periodFraction < 0) periodFraction = 0;
-      if (periodFraction > 1) periodFraction = 1;
-    }
 
-    // schedule notifications if predictionResult available (kept logic)
-    if (predictionResult != null) {
-      final settingsService = SettingsService();
-      final periodNotificationsEnabled = await settingsService
-          .areNotificationsEnabled();
-      final periodNotificationDays = await settingsService
-          .getNotificationDays();
-      final periodNotificationTime = await settingsService
-          .getNotificationTime();
-
-      final periodOverdueNotificationsEnabled = await settingsService
-          .areNotificationsEnabled();
-      final periodOverdueNotificationDays = await settingsService
-          .getNotificationDays();
-      final periodOverdueNotificationTime = await settingsService
-          .getNotificationTime();
-
-      if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        try {
-          await NotificationService.schedulePeriodNotifications(
-            scheduledTime: predictionResult.estimatedStartDate,
-            areEnabled: periodNotificationsEnabled,
-            daysBefore: periodNotificationDays,
-            notificationTime: periodNotificationTime,
-            title: l10n.notification_periodTitle,
-            body: l10n.notification_periodBody(periodNotificationDays),
-            notificationID: periodDueNotificationId,
-          );
-        } catch (e) {
-          debugPrint('Error creating period notification: $e');
-        }
-
-        try {
-          await NotificationService.schedulePeriodNotifications(
-            scheduledTime: predictionResult.estimatedStartDate,
-            areEnabled: periodOverdueNotificationsEnabled,
-            daysAfter: periodOverdueNotificationDays,
-            notificationTime: periodOverdueNotificationTime,
-            title: l10n.notification_periodOverdueTitle,
-            body: l10n.notification_periodOverdueBody(
-              periodOverdueNotificationDays,
-            ),
-            notificationID: periodOverdueNotificationId,
-          );
-        } catch (e) {
-          debugPrint('Error creating period overdue notification: $e');
-        }
-      }
+      // Calcule la fenêtre d’ovulation (jour 14 en moyenne)
+      int ovulationDay = (cycleLength / 2).round();
+      ovulationStartFraction =
+          (ovulationDay - 4) / cycleLength; // 4 jours avant ovulation
     }
 
     setState(() {
@@ -276,7 +189,9 @@ class LogsScreenState extends State<LogsScreen> {
       _predictionResult = predictionResult;
       _selectedView = selectedView;
       _dayInCycle = dayInCycle;
+      _cycleLength = cycleLength;
       _periodFraction = periodFraction;
+      _ovulationStartFraction = ovulationStartFraction;
       _isLoading = false;
     });
   }
@@ -291,7 +206,7 @@ class LogsScreenState extends State<LogsScreen> {
     } else if (_predictionResult == null) {
       predictionText = l10n.logScreen_logAtLeastTwoPeriods;
     } else {
-      String datePart = DateFormat(
+      final datePart = DateFormat(
         'dd/MM/yyyy',
       ).format(_predictionResult!.estimatedStartDate);
       if (_predictionResult!.daysUntilDue > 0) {
@@ -308,35 +223,32 @@ class LogsScreenState extends State<LogsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 100),
-        // Circle + center text
         Stack(
           alignment: Alignment.center,
           children: [
             BasicProgressCircle(
               periodFraction: _periodFraction,
+              ovulationStartFraction: _ovulationStartFraction,
+              ovulationFraction: 7 / _cycleLength,
               circleSize: 220,
               strokeWidth: 20,
-              progressColor: const Color.fromARGB(255, 255, 118, 118),
-              trackColor: const Color.fromARGB(20, 255, 118, 118),
+              dayInCycle: _dayInCycle,
+              cycleLength: _cycleLength,
             ),
+
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Jour',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '$_dayInCycle',
                   style: const TextStyle(
-                    fontSize: 48,
+                    fontSize: 56,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
                   ),
                 ),
               ],
@@ -361,10 +273,8 @@ class LogsScreenState extends State<LogsScreen> {
             periodLogEntries: _periodLogEntries,
             periodEntries: _periodEntries,
             isLoading: _isLoading,
-            onLogRequested: (d) => createNewLog(d),
-            onLogTapped: (log) {
-              _showDetailsBottomSheet(log);
-            },
+            onLogRequested: createNewLog,
+            onLogTapped: (log) => _showDetailsBottomSheet(log),
           ),
         ),
       ],
