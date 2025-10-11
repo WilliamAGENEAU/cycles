@@ -125,14 +125,13 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Ne retourne plus d'Expanded à la racine — utilise Center ou SizedBox contraint.
     if (widget.isLoading) {
-      return const Expanded(child: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (widget.periodLogEntries.isEmpty) {
-      return Expanded(
-        child: Center(child: Text(l10n.journalViewWidget_logYourFirstPeriod)),
-      );
+      return Center(child: Text(l10n.journalViewWidget_logYourFirstPeriod));
     }
 
     final earliestLogDate = widget.periodLogEntries
@@ -145,7 +144,12 @@ class _PeriodJournalViewState extends State<PeriodJournalView> {
         ? predictedEnd.add(const Duration(days: 5))
         : DateTime.now().add(const Duration(days: 5));
 
-    return Expanded(
+    // Fournir une hauteur finie au calendrier pour éviter overflow / taille infinie.
+    final screenHeight = MediaQuery.of(context).size.height;
+    final calendarHeight = (screenHeight * 0.55).clamp(320.0, 720.0);
+
+    return SizedBox(
+      height: calendarHeight,
       child: TableCalendar(
         locale: 'fr_FR',
         startingDayOfWeek: StartingDayOfWeek.monday,

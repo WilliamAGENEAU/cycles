@@ -10,6 +10,10 @@ class BasicProgressCircle extends StatefulWidget {
   final int dayInCycle;
   final int cycleLength;
 
+  // Nouveau : indique s'il y a des données à afficher ; si false on affiche le placeholder
+  final bool hasData;
+  final String? placeholderMessage;
+
   const BasicProgressCircle({
     super.key,
     required this.periodFraction,
@@ -19,6 +23,8 @@ class BasicProgressCircle extends StatefulWidget {
     required this.strokeWidth,
     required this.dayInCycle,
     required this.cycleLength,
+    this.hasData = true,
+    this.placeholderMessage,
   });
 
   @override
@@ -71,6 +77,8 @@ class _BasicProgressCircleState extends State<BasicProgressCircle>
             strokeWidth: widget.strokeWidth,
             dayInCycle: animatedDay.toInt(),
             cycleLength: widget.cycleLength,
+            hasData: widget.hasData,
+            placeholderMessage: widget.placeholderMessage,
           ),
         );
       },
@@ -86,6 +94,10 @@ class _BasicProgressCirclePainter extends CustomPainter {
   final int dayInCycle;
   final int cycleLength;
 
+  // nouveau
+  final bool hasData;
+  final String? placeholderMessage;
+
   _BasicProgressCirclePainter({
     required this.periodFraction,
     required this.ovulationStartFraction,
@@ -93,6 +105,8 @@ class _BasicProgressCirclePainter extends CustomPainter {
     required this.strokeWidth,
     required this.dayInCycle,
     required this.cycleLength,
+    this.hasData = true,
+    this.placeholderMessage,
   });
 
   @override
@@ -101,13 +115,34 @@ class _BasicProgressCirclePainter extends CustomPainter {
     final radius = (size.width - strokeWidth) / 2;
     const startAngle = -pi / 2;
 
-    // 🎨 Cercle de fond
+    // 🎨 Cercle de fond (teinte douce)
     final paintBase = Paint()
       ..color = const Color.fromARGB(20, 255, 118, 118)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
     canvas.drawCircle(center, radius, paintBase);
+
+    // Si pas de données : on affiche uniquement le cercle de fond + message centré
+    if (!hasData) {
+      final message = placeholderMessage ?? 'Veuillez enregistrer une période';
+      final tp = TextPainter(
+        text: TextSpan(
+          text: message,
+          style: TextStyle(
+            color: Colors.white, // <-- couleur blanche
+            fontSize: size.width * 0.06, // <-- plus petit
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+        maxLines: 2,
+      );
+      tp.layout(maxWidth: radius * 1.6);
+      tp.paint(canvas, center - Offset(tp.width / 2, tp.height / 2));
+      return;
+    }
 
     // 🔴 Période (règles)
     final paintPeriod = Paint()
@@ -210,5 +245,7 @@ class _BasicProgressCirclePainter extends CustomPainter {
       oldDelegate.ovulationStartFraction != ovulationStartFraction ||
       oldDelegate.ovulationFraction != ovulationFraction ||
       oldDelegate.dayInCycle != dayInCycle ||
-      oldDelegate.cycleLength != cycleLength;
+      oldDelegate.cycleLength != cycleLength ||
+      oldDelegate.hasData != hasData ||
+      oldDelegate.placeholderMessage != placeholderMessage;
 }

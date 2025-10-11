@@ -219,6 +219,8 @@ class LogsScreenState extends State<LogsScreen> {
       }
     }
 
+    final hasPeriodData = _periodEntries.isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -234,23 +236,32 @@ class LogsScreenState extends State<LogsScreen> {
               strokeWidth: 20,
               dayInCycle: _dayInCycle,
               cycleLength: _cycleLength,
+              // nouveau : affichage placeholder quand aucune période enregistrée
+              hasData: hasPeriodData,
+              placeholderMessage: hasPeriodData
+                  ? null
+                  : 'Veuillez enregistrer une période',
             ),
 
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Jour',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '$_dayInCycle',
-                  style: const TextStyle(
-                    fontSize: 56,
-                    fontWeight: FontWeight.bold,
+                // si pas de données, on affiche le message au centre (BasicProgressCircle s'en charge),
+                // on évite d'afficher "Jour / nombre" lorsque hasData == false
+                if (hasPeriodData) ...[
+                  const Text(
+                    'Jour',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
-                ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '$_dayInCycle',
+                    style: const TextStyle(
+                      fontSize: 56,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
